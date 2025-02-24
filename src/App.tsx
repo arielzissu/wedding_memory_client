@@ -1,26 +1,30 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { SyntheticEvent, useState } from "react";
+import ImageUploaderModal from "./components/ImageUploader/ImageUploader";
+import ImageGallery from "./components/ImageGallery/ImageGallery";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import { AppContainer, ContainTabs } from "./app.styles";
 
-function App() {
+export const App = () => {
+  const [value, setValue] = useState(0);
+
+  const handleChange = (_e: SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    <AppContainer>
+      <ContainTabs>
+        <Tabs value={value} onChange={handleChange}>
+          <Tab label="Upload Images" />
+          <Tab label="Images List" />
+        </Tabs>
+      </ContainTabs>
 
-export default App;
+      <div>
+        {value === 0 && <ImageUploaderModal />}
+        {value === 1 && <ImageGallery />}
+      </div>
+    </AppContainer>
+  );
+};
