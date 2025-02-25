@@ -17,6 +17,7 @@ import LoginModal, { USER_EMAIL_KEY } from "../Login/Login";
 import { getUrlSearchParams } from "utils/navigation";
 import { getFromLocalStorage } from "utils/localStorage";
 import { ICloudinaryFile } from "types";
+import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -156,7 +157,7 @@ const ImageUploader = () => {
           <input
             type="file"
             multiple
-            accept="image/*,video/*"
+            accept={SUPPORTED_MEDIA_FORMATS.join()}
             hidden
             onChange={handleFileChange}
           />
