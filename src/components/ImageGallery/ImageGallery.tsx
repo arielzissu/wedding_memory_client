@@ -51,6 +51,7 @@ const ImageGallery = () => {
               key={`${video.publicId}-${index}`}
               src={video.url}
               controls
+              poster={video.thumbnail_url}
             />
           ))}
         </ContainAssetsList>
