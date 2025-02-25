@@ -124,7 +124,7 @@ const ImageUploader = () => {
           >
             <DeleteIcon />
           </DeleteButton>
-          <PreviewVideo controls src={file.url} />
+          <PreviewVideo controls src={file.url} poster={file.thumbnail} />
         </>
       );
     }
