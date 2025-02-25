@@ -19,6 +19,18 @@ export const getImages = async (
   });
 };
 
+export const getDownloadedFolderAssets = async (
+  folderPath: string
+): Promise<void> => {
+  return await request({
+    uri: `/cloudinary/download-folder-assets`,
+    method: "GET",
+    params: {
+      folderPath,
+    },
+  });
+};
+
 export const uploadImages = async (
   formData: FormData,
   relevantFile: string,

@@ -12,12 +12,18 @@ import {
   DeleteButton,
   ContainImageUploader,
 } from "./ImageUploader.styles";
-import { deleteImage, getImages, uploadImages } from "api/cloudinary";
+import {
+  deleteImage,
+  getImages,
+  uploadImages,
+  getDownloadedFolderAssets,
+} from "api/cloudinary";
 import LoginModal, { USER_EMAIL_KEY } from "../Login/Login";
 import { getUrlSearchParams } from "utils/navigation";
 import { getFromLocalStorage } from "utils/localStorage";
 import { ICloudinaryFile } from "types";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
+import { Download } from "@mui/icons-material";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -27,6 +33,8 @@ const ImageUploader = () => {
   const [isLoadingUpload, setIsLoadingUpload] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
+  const [isDownloadedFolderAssets, setIsDownloadedFolderAssets] =
+    useState<boolean>(false);
 
   const relevantFile = getUrlSearchParams("f");
 
@@ -139,6 +147,14 @@ const ImageUploader = () => {
     }
   };
 
+  const handleDownloadFolderAssets = async () => {
+    setIsDownloadedFolderAssets(true);
+    await getDownloadedFolderAssets(relevantFile);
+    setIsDownloadedFolderAssets(false);
+  };
+
+  const disabledButtons = isLoadingUpload || isDownloadedFolderAssets;
+
   if (!relevantFile) return <div>Error - Missing Data</div>;
 
   return (
@@ -152,6 +168,7 @@ const ImageUploader = () => {
           variant="contained"
           component="label"
           onClick={onClickFileInput}
+          disabled={disabledButtons}
         >
           Upload Files
           <input
@@ -163,6 +180,23 @@ const ImageUploader = () => {
           />
         </Button>
       </UploadContainer>
+
+      <Button
+        startIcon={<Download />}
+        variant="contained"
+        component="label"
+        onClick={handleDownloadFolderAssets}
+        disabled={disabledButtons}
+      >
+        {isDownloadedFolderAssets ? (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          "Download all photos and videos"
+        )}
+      </Button>
+
       {files.length > 0 && <div>Your uploaded list:</div>}
       {isLoadingUpload ? (
         <Box display="flex" justifyContent="center" mt={2}>
