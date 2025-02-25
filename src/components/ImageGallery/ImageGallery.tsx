@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import { fetchHello, getImages } from "api/cloudinary";
+import { getImages } from "api/cloudinary";
 import { ICloudinaryFile } from "../../types";
 import { getUrlSearchParams } from "utils/navigation";
 import {
@@ -26,7 +26,6 @@ const ImageGallery = () => {
   };
 
   useEffect(() => {
-    fetchHello();
     fetchImages();
   }, []);
 

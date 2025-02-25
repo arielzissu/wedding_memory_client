@@ -51,10 +51,3 @@ export const deleteImage = async (
     },
   });
 };
-
-export const fetchHello = async () => {
-  return await request({
-    uri: `/cloudinary/hello`,
-    method: "GET",
-  });
-};
