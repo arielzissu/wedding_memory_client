@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { ResourceType } from "cloudinary";
-import { Box, Button, Typography, CircularProgress } from "@mui/material";
-import CloudUpload from "@mui/icons-material/CloudUpload";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  PreviewImage,
-  UploadContainer,
-  PreviewVideo,
-  PreviewItem,
-  PreviewGrid,
-  DeleteButton,
-  ContainImageUploader,
-} from "./ImageUploader.styles";
-import {
-  deleteImage,
-  getImages,
-  uploadImages,
-  getDownloadedFolderAssets,
-} from "api/cloudinary";
+import { UploadContainer } from "./ImageUploader.styles";
+import { deleteImage, getImages, uploadImages } from "api/cloudinary";
 import LoginModal, { USER_EMAIL_KEY } from "../Login/Login";
 import { getUrlSearchParams } from "utils/navigation";
 import { getFromLocalStorage } from "utils/localStorage";
 import { ICloudinaryFile } from "types";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
-import { Download } from "@mui/icons-material";
+import {
+  Button,
+  Typography,
+  Box,
+  Card,
+  CardMedia,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import { Delete } from "@mui/icons-material";
+import Grid from "@mui/material/Grid2";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -33,8 +28,6 @@ const ImageUploader = () => {
   const [isLoadingUpload, setIsLoadingUpload] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
-  const [isDownloadedFolderAssets, setIsDownloadedFolderAssets] =
-    useState<boolean>(false);
 
   const relevantFile = getUrlSearchParams("f");
 
@@ -48,11 +41,9 @@ const ImageUploader = () => {
 
   const getUserEmail = () => {
     const localStorageEmail = getFromLocalStorage(USER_EMAIL_KEY);
-    if (!localStorageEmail) {
-      setIsOpenLoginModal(true);
-      return;
+    if (localStorageEmail) {
+      setUserEmail(localStorageEmail.email);
     }
-    setUserEmail(localStorageEmail);
   };
 
   useEffect(() => {
@@ -113,113 +104,98 @@ const ImageUploader = () => {
   };
 
   const renderPreview = (file: ICloudinaryFile, index: number) => {
-    const fileType = file.type;
-    if (fileType === "image") {
-      return (
-        <>
-          <DeleteButton
+    return (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+        <Card sx={{ position: "relative" }}>
+          {file.type === "image" ? (
+            <CardMedia component="img" image={file.url} alt="Uploaded image" />
+          ) : (
+            <CardMedia
+              component="video"
+              controls
+              src={file.url}
+              // poster={file.thumbnail}
+            />
+          )}
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 5,
+              right: 5,
+              bgcolor: "rgba(255,255,255,0.7)",
+            }}
             onClick={() => handleDelete(index, file.publicId, file.type)}
           >
-            <DeleteIcon />
-          </DeleteButton>
-          <PreviewImage src={file.url} alt={`Image-${index}`} />
-        </>
-      );
-    } else if (fileType === "video") {
-      return (
-        <>
-          <DeleteButton
-            onClick={() => handleDelete(index, file.publicId, file.type)}
-          >
-            <DeleteIcon />
-          </DeleteButton>
-          <PreviewVideo controls src={file.url} poster={file.thumbnail} />
-        </>
-      );
-    }
-    return null;
+            <Delete />
+          </IconButton>
+        </Card>
+      </Grid>
+    );
   };
 
-  const onClickFileInput = () => {
+  const onClickFileInput = (event) => {
     if (!userEmail) {
+      event.preventDefault();
       setIsOpenLoginModal(true);
       return;
     }
   };
 
-  const handleDownloadFolderAssets = async () => {
-    setIsDownloadedFolderAssets(true);
-    await getDownloadedFolderAssets(relevantFile);
-    setIsDownloadedFolderAssets(false);
-  };
-
-  const disabledButtons = isLoadingUpload || isDownloadedFolderAssets;
-
   if (!relevantFile) return <div>Error - Missing Data</div>;
 
   return (
-    <ContainImageUploader>
+    <>
       <UploadContainer>
         <Typography variant="h6">
           click to upload: (limit to {MAX_SIZE_IN_GB} GB)
         </Typography>
         <Button
-          startIcon={<CloudUpload />}
+          startIcon={<CloudUploadIcon />}
           variant="contained"
+          sx={{ mt: 1 }}
           component="label"
           onClick={onClickFileInput}
-          disabled={disabledButtons}
+          disabled={isLoadingUpload}
         >
-          Upload Files
-          <input
-            type="file"
-            multiple
-            accept={SUPPORTED_MEDIA_FORMATS.join()}
-            hidden
-            onChange={handleFileChange}
-          />
+          {isLoadingUpload ? (
+            <Box display="flex" justifyContent="center" minWidth={"120px"}>
+              <CircularProgress size={30} />
+            </Box>
+          ) : (
+            <>
+              <Typography>Upload Files</Typography>
+              <input
+                type="file"
+                multiple
+                accept={SUPPORTED_MEDIA_FORMATS.join()}
+                hidden
+                onChange={handleFileChange}
+              />
+            </>
+          )}
         </Button>
       </UploadContainer>
 
-      <Button
-        startIcon={<Download />}
-        variant="contained"
-        component="label"
-        onClick={handleDownloadFolderAssets}
-        disabled={disabledButtons}
-      >
-        {isDownloadedFolderAssets ? (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          "Download all photos and videos"
-        )}
-      </Button>
+      <Typography variant="h6" textAlign="left" sx={{ mb: 2 }}>
+        Your uploaded list:
+      </Typography>
+      <Grid container spacing={2}>
+        {files.map((file, index) => renderPreview(file, index))}
+      </Grid>
 
-      {files.length > 0 && <div>Your uploaded list:</div>}
-      {isLoadingUpload ? (
+      {isLoadingUpload && (
         <Box display="flex" justifyContent="center" mt={2}>
           <CircularProgress />
         </Box>
-      ) : (
-        files.length > 0 && (
-          <PreviewGrid>
-            {files.map((file, index) => (
-              <PreviewItem key={index}>
-                {renderPreview(file, index)}
-              </PreviewItem>
-            ))}
-          </PreviewGrid>
-        )
       )}
+
       {isOpenLoginModal && (
         <LoginModal
           isOpen={isOpenLoginModal}
           onClose={() => setIsOpenLoginModal(false)}
         />
       )}
-    </ContainImageUploader>
+    </>
   );
 };
 

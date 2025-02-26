@@ -15,10 +15,17 @@ interface GoogleLoginModalProps {
 const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
   const handleLoginSuccess = (credentialResponse) => {
     try {
-      const decodedToken: { email: string } & JwtPayload = jwtDecode(
-        credentialResponse.credential
-      );
-      saveToLocalStorage(USER_EMAIL_KEY, decodedToken.email);
+      const decodedToken: {
+        email: string;
+        name: string;
+        picture: string;
+      } & JwtPayload = jwtDecode(credentialResponse.credential);
+      saveToLocalStorage(USER_EMAIL_KEY, {
+        email: decodedToken.email,
+        name: decodedToken.name,
+        picture: decodedToken.picture,
+      });
+      window.location.reload();
     } catch (error) {
       console.error("Error decoding token:", error);
     } finally {

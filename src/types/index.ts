@@ -6,3 +6,9 @@ export interface ICloudinaryFile {
   type: ResourceType;
   thumbnail: string;
 }
+
+export interface ILocalUser {
+  name: string;
+  email: string;
+  picture: string;
+}
