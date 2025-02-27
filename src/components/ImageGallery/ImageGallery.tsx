@@ -3,26 +3,22 @@ import { Box, CircularProgress } from "@mui/material";
 import { getImages } from "api/cloudinary";
 import { ICloudinaryFile } from "../../types";
 import { getUrlSearchParams } from "utils/navigation";
-import {
-  ContainAssetsList,
-  ContainImageGallery,
-  StyledImg,
-  StyledVideo,
-} from "./ImageGallery.style";
+import { ContainImageGallery } from "./ImageGallery.style";
+import ImageList from "components/ImageList/ImageList";
 
 const ImageGallery = () => {
-  const [images, setImages] = useState<ICloudinaryFile[]>([]);
-  const [videos, setVideos] = useState<ICloudinaryFile[]>([]);
+  const [files, setFiles] = useState<ICloudinaryFile[]>([]);
   const [isLoadingImages, setIsLoadingImages] = useState<boolean>(true);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const relevantFile = getUrlSearchParams("f");
 
   const fetchImages = async () => {
     setIsLoadingImages(true);
     const response = await getImages(relevantFile);
+    const oldImageList = [...response.images, ...response.videos];
+    setFiles((prevFiles) => [...prevFiles, ...oldImageList]);
     setIsLoadingImages(false);
-    setImages(response.images);
-    setVideos(response.videos);
   };
 
   useEffect(() => {
@@ -38,23 +34,12 @@ const ImageGallery = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <ContainAssetsList>
-          {images.map((image, index) => (
-            <StyledImg
-              key={`${image.publicId}-${index}`}
-              src={image.url}
-              alt={`Cloudinary ${index}`}
-            />
-          ))}
-          {videos.map((video, index) => (
-            <StyledVideo
-              key={`${video.publicId}-${index}`}
-              src={video.url}
-              controls
-              poster={video.thumbnail}
-            />
-          ))}
-        </ContainAssetsList>
+        <ImageList
+          selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
+          files={files}
+          setFiles={setFiles}
+        />
       )}
     </ContainImageGallery>
   );

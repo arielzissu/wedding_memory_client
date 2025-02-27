@@ -9,10 +9,3 @@ export const UploadContainer = styled.div`
   border-radius: 8px;
   margin: 16px;
 `;
-
-export const SwiperWrapper = styled.div`
-  .swiper-wrapper {
-    display: flex;
-    align-items: center;
-  }
-`;

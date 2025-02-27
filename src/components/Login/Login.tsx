@@ -5,7 +5,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { saveToLocalStorage } from "../../utils/localStorage";
 
 export const USER_EMAIL_KEY = "userEmail";
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // TODO: move this value to server side
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 interface GoogleLoginModalProps {
   isOpen: boolean;

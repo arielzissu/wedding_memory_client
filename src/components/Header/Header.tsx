@@ -1,12 +1,14 @@
 import React from "react";
-import { Avatar, Typography, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import { ILocalUser } from "types";
+import { AvatarImg } from "./Header.styles";
 
 interface HeaderProps {
   user?: ILocalUser;
 }
 
 const Header = ({ user }: HeaderProps) => {
+  console.log("user.picture: ", user?.picture);
   return (
     <Box
       sx={{
@@ -25,8 +27,12 @@ const Header = ({ user }: HeaderProps) => {
       </Typography>
       {user && (
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Avatar src={user.picture} alt={user.name} />
-          <Typography sx={{ ml: 1 }}>{user.name}</Typography>
+          <Typography sx={{ mr: 1 }}>{user.name}</Typography>
+          <AvatarImg
+            src={user.picture}
+            alt={user.name}
+            referrerPolicy="no-referrer"
+          />
         </Box>
       )}
     </Box>
