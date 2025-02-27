@@ -16,7 +16,11 @@ const Header = ({ user }: HeaderProps) => {
         mb: 2,
       }}
     >
-      <Typography variant="h4" fontWeight={600}>
+      <Typography
+        variant="h4"
+        fontWeight={600}
+        sx={{ fontSize: { xs: "1rem", sm: "2rem", md: "2.5rem" } }}
+      >
         Wedding Memory
       </Typography>
       {user && (
