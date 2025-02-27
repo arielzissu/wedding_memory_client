@@ -8,7 +8,6 @@ interface HeaderProps {
 }
 
 const Header = ({ user }: HeaderProps) => {
-  console.log("user.picture: ", user?.picture);
   return (
     <Box
       sx={{

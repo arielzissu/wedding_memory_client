@@ -23,6 +23,7 @@ interface ImageListProps {
   files: ICloudinaryFile[];
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
   setFiles: React.Dispatch<React.SetStateAction<ICloudinaryFile[]>>;
+  isDeletable?: boolean;
 }
 
 const ImageList = ({
@@ -30,12 +31,15 @@ const ImageList = ({
   files,
   setSelectedIndex,
   setFiles,
+  isDeletable = false,
 }: ImageListProps) => {
   const handleDelete = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
     publicId: string,
     resourceType: ResourceType
   ) => {
+    e.stopPropagation();
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     await deleteImage(publicId, resourceType);
   };
@@ -78,17 +82,19 @@ const ImageList = ({
               onClick={(e) => onClickCard(e, index)}
             />
           )}
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 5,
-              right: 5,
-              bgcolor: "rgba(255,255,255,0.7)",
-            }}
-            onClick={() => handleDelete(index, file.publicId, file.type)}
-          >
-            <Delete />
-          </IconButton>
+          {isDeletable && (
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                bgcolor: "rgba(255,255,255,0.7)",
+              }}
+              onClick={(e) => handleDelete(e, index, file.publicId, file.type)}
+            >
+              <Delete />
+            </IconButton>
+          )}
         </Card>
       </Grid>
     );

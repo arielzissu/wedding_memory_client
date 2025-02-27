@@ -131,6 +131,7 @@ const ImageUploader = () => {
         setSelectedIndex={setSelectedIndex}
         files={files}
         setFiles={setFiles}
+        isDeletable={true}
       />
 
       {isLoadingUpload && (

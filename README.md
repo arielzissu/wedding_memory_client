@@ -47,10 +47,5 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 
 TODOs:
-- create carousel when you click on one image card
 - support fail upload image (continue with the rest images)
 - support pagination
-
-bugs:
-- env file is not in .gitIgnore !!!!
-- handle carousel for the gallery image page
