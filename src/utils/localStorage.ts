@@ -3,7 +3,7 @@ export const saveToLocalStorage = (key: string, value: any): void => {
     const serializedValue = JSON.stringify(value);
     localStorage.setItem(key, serializedValue);
   } catch (error) {
-    console.error('Error saving to localStorage:', error);
+    console.error("Error saving to localStorage:", error);
   }
 };
 
@@ -12,7 +12,11 @@ export const getFromLocalStorage = (key: string): any => {
     const value = localStorage.getItem(key);
     return value ? JSON.parse(value) : null;
   } catch (error) {
-    console.error('Error getting data from localStorage:', error);
+    console.error("Error getting data from localStorage:", error);
     return null;
   }
+};
+
+export const removeFromLocalStorage = (key: string) => {
+  localStorage.removeItem(key);
 };

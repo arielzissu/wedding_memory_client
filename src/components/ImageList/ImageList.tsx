@@ -1,15 +1,23 @@
-import React, { useState, useRef } from "react";
-import { Box, IconButton, Modal } from "@mui/material";
-import { Delete, Close } from "@mui/icons-material";
+import React, { useState, useEffect, useRef } from "react";
+import { Box, IconButton, Modal, Fab } from "@mui/material";
+import {
+  Delete,
+  Close,
+  ZoomIn,
+  ZoomOut,
+  ArrowUpward,
+} from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { SwiperWrapper } from "./ImageList.styles";
+import { ImageListWrapper, SwiperWrapper } from "./ImageList.styles";
 import { ICloudinaryFile } from "types";
 import { deleteImage } from "api/cloudinary";
+
+const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 
 interface ImageListProps {
   selectedIndex: number | null;
@@ -26,56 +34,41 @@ const ImageList = ({
   setFiles,
   isDeletable = false,
 }: ImageListProps) => {
-  const [zoomLevel, setZoomLevel] = useState(300); // Default thumbnail size
-  const photosSectionRef = useRef<HTMLDivElement>(null);
-  const pinchStartDistance = useRef<number | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(150);
+  const [columns, setColumns] = useState(3);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Calculate the distance between two touch points
-  const getPinchDistance = (e: React.TouchEvent) => {
-    console.log('e.touches: ', e.touches);
-    if (e.touches.length === 2) {
-      const touch1 = e.touches[0];
-      console.log('touch1: ', touch1);
-      const touch2 = e.touches[1];
-      console.log('touch2: ', touch2);
-      const dx = touch2.clientX - touch1.clientX;
-      const dy = touch2.clientY - touch1.clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-    return null;
-  };
-
-  // Handle touch start to detect pinch gesture
-  const handleTouchStart = (e: React.TouchEvent) => {
-    console.log('Touch Start:', e.touches);
-    if (photosSectionRef.current?.contains(e.target as Node)) {
-      if (e.touches.length === 2) {
-        pinchStartDistance.current = getPinchDistance(e);
+  useEffect(() => {
+    const updateColumns = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const newColumns = Math.max(1, Math.floor(containerWidth / zoomLevel));
+        setColumns(newColumns);
       }
-      e.preventDefault(); // Prevent native zooming
-    }
-  };
+    };
 
-  // Handle touch move to adjust zoom level
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (photosSectionRef.current?.contains(e.target as Node)) {
-      if (e.touches.length === 2 && pinchStartDistance.current !== null) {
-        const currentDistance = getPinchDistance(e);
-        if (currentDistance !== null) {
-          const zoomDelta = currentDistance - pinchStartDistance.current;
-          setZoomLevel((prevZoomLevel) =>
-            Math.max(100, Math.min(500, prevZoomLevel + zoomDelta / 5))
-          );
-          pinchStartDistance.current = currentDistance; // Update the starting distance
-        }
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => {
+      window.removeEventListener("resize", updateColumns);
+    };
+  }, [zoomLevel]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > SHOW_SCROLL_BUTTON_FROM_Y_PIXEL) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
       }
-      e.preventDefault(); // Prevent native zooming
-    }
-  };
+    };
 
-  const handleTouchEnd = () => {
-    pinchStartDistance.current = null; // Reset pinch distance
-  };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -91,14 +84,20 @@ const ImageList = ({
     setSelectedIndex(index);
   };
 
+  const scrollToFirstImage = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const images = files.map((file, index) => ({
     src: file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
     thumbnail:
       file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
-    thumbnailWidth: zoomLevel, // Dynamically adjust width based on zoom level
-    thumbnailHeight: zoomLevel, // Dynamically adjust height based on zoom level
-    width: zoomLevel, // Add width property
-    height: zoomLevel, // Add height property
+    thumbnailWidth: zoomLevel,
+    thumbnailHeight: zoomLevel,
+    width: zoomLevel,
+    height: zoomLevel,
     customOverlay: isDeletable ? (
       <IconButton
         sx={{
@@ -106,6 +105,7 @@ const ImageList = ({
           top: 5,
           right: 5,
           bgcolor: "rgba(255,255,255,0.7)",
+          pointerEvents: "auto",
         }}
         onClick={(e) => handleDelete(e, index, file.publicId)}
       >
@@ -117,22 +117,55 @@ const ImageList = ({
   }));
 
   return (
-    <div
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      ref={photosSectionRef}
-    >
-      {/* Photos List Section */}
+    <ImageListWrapper ref={containerRef}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 2,
+        }}
+      >
+        <IconButton
+          onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}
+        >
+          <ZoomOut sx={{ fontSize: 25 }} />
+        </IconButton>
+        <Box sx={{ mx: 1, fontSize: "1.2rem" }}>{zoomLevel}px</Box>
+        <IconButton
+          onClick={() => setZoomLevel((prev) => Math.min(prev + 50, 400))}
+        >
+          <ZoomIn sx={{ fontSize: 25 }} />
+        </IconButton>
+      </Box>
+
       <Gallery
         images={images}
         enableImageSelection={false}
-        margin={5} // Add margin between items
-        rowHeight={zoomLevel} // Dynamically adjust row height based on zoom level
+        margin={5}
+        rowHeight={zoomLevel}
         onClick={(index) => onClickCard(index)}
       />
 
-      {/* Modal Section */}
+      <Fab
+        color="primary"
+        aria-label="scroll-to-top"
+        sx={{
+          position: "fixed",
+          bottom: 60,
+          right: "50%",
+          transform: showScrollButton
+            ? "translate(50%, 0)"
+            : "translate(50%, 20px)",
+          opacity: showScrollButton ? 1 : 0,
+          transition: "opacity 0.3s ease, transform 0.3s ease",
+          pointerEvents: showScrollButton ? "auto" : "none",
+        }}
+        onClick={scrollToFirstImage}
+      >
+        <ArrowUpward />
+      </Fab>
+
       <Modal
         open={selectedIndex !== null}
         onClose={() => setSelectedIndex(null)}
@@ -208,7 +241,7 @@ const ImageList = ({
           </SwiperWrapper>
         </Box>
       </Modal>
-    </div>
+    </ImageListWrapper>
   );
 };
 

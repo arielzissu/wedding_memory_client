@@ -3,6 +3,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import { Dialog, DialogTitle, DialogContent, Box } from "@mui/material";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { saveToLocalStorage } from "../../utils/localStorage";
+import { ILocalUser } from "types";
 
 export const USER_EMAIL_KEY = "userEmail";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
@@ -15,11 +16,9 @@ interface GoogleLoginModalProps {
 const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
   const handleLoginSuccess = (credentialResponse) => {
     try {
-      const decodedToken: {
-        email: string;
-        name: string;
-        picture: string;
-      } & JwtPayload = jwtDecode(credentialResponse.credential);
+      const decodedToken: ILocalUser & JwtPayload = jwtDecode(
+        credentialResponse.credential
+      );
       saveToLocalStorage(USER_EMAIL_KEY, {
         email: decodedToken.email,
         name: decodedToken.name,
