@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { ResourceType } from "cloudinary";
-import { Box, IconButton, Modal, Slider } from "@mui/material";
-import { Delete, Close, ZoomIn, ZoomOut } from "@mui/icons-material";
+import React, { useState, useEffect } from "react";
+import { Box, IconButton, Modal } from "@mui/material";
+import { Delete, Close } from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -27,17 +26,30 @@ const ImageList = ({
   setFiles,
   isDeletable = false,
 }: ImageListProps) => {
-  const [zoomLevel, setZoomLevel] = useState(300); // Default thumbnail width
+  const [rowHeight, setRowHeight] = useState(300); // Default thumbnail size
+
+  // Listen for zoom changes on mobile and adjust only the photos list
+  useEffect(() => {
+    const handleZoomChange = () => {
+      const scale = window.visualViewport?.scale || 1; // Default scale is 1
+      const newRowHeight = Math.max(100, Math.min(500, 300 / scale)); // Adjust row height based on scale
+      setRowHeight(newRowHeight);
+    };
+
+    window.visualViewport?.addEventListener("resize", handleZoomChange);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleZoomChange);
+    };
+  }, []);
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
-    publicId: string,
-    resourceType: ResourceType
+    publicId: string
   ) => {
     e.stopPropagation();
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    await deleteImage(publicId, resourceType);
+    await deleteImage(publicId, files[index].type);
   };
 
   const onClickCard = (index: number) => {
@@ -48,10 +60,10 @@ const ImageList = ({
     src: file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
     thumbnail:
       file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
-    thumbnailWidth: zoomLevel, // Dynamically adjust width based on zoom level
-    thumbnailHeight: zoomLevel, // Dynamically adjust height based on zoom level
-    width: zoomLevel, // Add width property
-    height: zoomLevel, // Add height property
+    thumbnailWidth: rowHeight, // Dynamically adjust width based on row height
+    thumbnailHeight: rowHeight, // Dynamically adjust height based on row height
+    width: rowHeight, // Add width property
+    height: rowHeight, // Add height property
     customOverlay: isDeletable ? (
       <IconButton
         sx={{
@@ -60,7 +72,7 @@ const ImageList = ({
           right: 5,
           bgcolor: "rgba(255,255,255,0.7)",
         }}
-        onClick={(e) => handleDelete(e, index, file.publicId, file.type)}
+        onClick={(e) => handleDelete(e, index, file.publicId)}
       >
         <Delete />
       </IconButton>
@@ -71,39 +83,16 @@ const ImageList = ({
 
   return (
     <>
-      {/* Zoom Controls */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: 2,
-        }}
-      >
-        <IconButton onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}>
-          <ZoomOut />
-        </IconButton>
-        <Slider
-          value={zoomLevel}
-          onChange={(e, value) => setZoomLevel(value as number)}
-          min={100}
-          max={500}
-          step={50}
-          sx={{ width: "200px", mx: 2 }}
-        />
-        <IconButton onClick={() => setZoomLevel((prev) => Math.min(prev + 50, 500))}>
-          <ZoomIn />
-        </IconButton>
-      </Box>
-
+      {/* Photos List Section */}
       <Gallery
         images={images}
         enableImageSelection={false}
         margin={5} // Add margin between items
-        rowHeight={zoomLevel} // Dynamically adjust row height based on zoom level
+        rowHeight={rowHeight} // Dynamically adjust row height based on zoom level
         onClick={(index) => onClickCard(index)}
       />
 
+      {/* Modal Section */}
       <Modal
         open={selectedIndex !== null}
         onClose={() => setSelectedIndex(null)}
