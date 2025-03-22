@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Box, IconButton, Modal } from "@mui/material";
 import { Delete, Close } from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
@@ -26,21 +26,52 @@ const ImageList = ({
   setFiles,
   isDeletable = false,
 }: ImageListProps) => {
-  const [rowHeight, setRowHeight] = useState(300); // Default thumbnail size
+  const [zoomLevel, setZoomLevel] = useState(300); // Default thumbnail size
+  const photosSectionRef = useRef<HTMLDivElement>(null);
+  const pinchStartDistance = useRef<number | null>(null);
 
-  // Listen for zoom changes on mobile and adjust only the photos list
-  useEffect(() => {
-    const handleZoomChange = () => {
-      const scale = window.visualViewport?.scale || 1; // Default scale is 1
-      const newRowHeight = Math.max(100, Math.min(500, 300 / scale)); // Adjust row height based on scale
-      setRowHeight(newRowHeight);
-    };
+  // Calculate the distance between two touch points
+  const getPinchDistance = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    return null;
+  };
 
-    window.visualViewport?.addEventListener("resize", handleZoomChange);
-    return () => {
-      window.visualViewport?.removeEventListener("resize", handleZoomChange);
-    };
-  }, []);
+  // Handle touch start to detect pinch gesture
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (photosSectionRef.current?.contains(e.target as Node)) {
+      if (e.touches.length === 2) {
+        pinchStartDistance.current = getPinchDistance(e);
+      }
+      e.preventDefault(); // Prevent native zooming
+    }
+  };
+
+  // Handle touch move to adjust zoom level
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (photosSectionRef.current?.contains(e.target as Node)) {
+      if (e.touches.length === 2 && pinchStartDistance.current !== null) {
+        const currentDistance = getPinchDistance(e);
+        if (currentDistance !== null) {
+          const zoomDelta = currentDistance - pinchStartDistance.current;
+          setZoomLevel((prevZoomLevel) =>
+            Math.max(100, Math.min(500, prevZoomLevel + zoomDelta / 5))
+          );
+          pinchStartDistance.current = currentDistance; // Update the starting distance
+        }
+      }
+      e.preventDefault(); // Prevent native zooming
+    }
+  };
+
+  const handleTouchEnd = () => {
+    pinchStartDistance.current = null; // Reset pinch distance
+  };
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -60,10 +91,10 @@ const ImageList = ({
     src: file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
     thumbnail:
       file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
-    thumbnailWidth: rowHeight, // Dynamically adjust width based on row height
-    thumbnailHeight: rowHeight, // Dynamically adjust height based on row height
-    width: rowHeight, // Add width property
-    height: rowHeight, // Add height property
+    thumbnailWidth: zoomLevel, // Dynamically adjust width based on zoom level
+    thumbnailHeight: zoomLevel, // Dynamically adjust height based on zoom level
+    width: zoomLevel, // Add width property
+    height: zoomLevel, // Add height property
     customOverlay: isDeletable ? (
       <IconButton
         sx={{
@@ -82,13 +113,18 @@ const ImageList = ({
   }));
 
   return (
-    <>
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      ref={photosSectionRef}
+    >
       {/* Photos List Section */}
       <Gallery
         images={images}
         enableImageSelection={false}
         margin={5} // Add margin between items
-        rowHeight={rowHeight} // Dynamically adjust row height based on zoom level
+        rowHeight={zoomLevel} // Dynamically adjust row height based on zoom level
         onClick={(index) => onClickCard(index)}
       />
 
@@ -168,7 +204,7 @@ const ImageList = ({
           </SwiperWrapper>
         </Box>
       </Modal>
-    </>
+    </div>
   );
 };
 
