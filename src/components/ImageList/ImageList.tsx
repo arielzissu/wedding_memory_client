@@ -32,9 +32,12 @@ const ImageList = ({
 
   // Calculate the distance between two touch points
   const getPinchDistance = (e: React.TouchEvent) => {
+    console.log('e.touches: ', e.touches);
     if (e.touches.length === 2) {
       const touch1 = e.touches[0];
+      console.log('touch1: ', touch1);
       const touch2 = e.touches[1];
+      console.log('touch2: ', touch2);
       const dx = touch2.clientX - touch1.clientX;
       const dy = touch2.clientY - touch1.clientY;
       return Math.sqrt(dx * dx + dy * dy);
@@ -44,6 +47,7 @@ const ImageList = ({
 
   // Handle touch start to detect pinch gesture
   const handleTouchStart = (e: React.TouchEvent) => {
+    console.log('Touch Start:', e.touches);
     if (photosSectionRef.current?.contains(e.target as Node)) {
       if (e.touches.length === 2) {
         pinchStartDistance.current = getPinchDistance(e);
