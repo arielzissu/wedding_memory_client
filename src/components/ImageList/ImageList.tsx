@@ -1,14 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { ResourceType } from "cloudinary";
-import {
-  Box,
-  IconButton,
-  Modal,
-  Card,
-  Grid2 as Grid,
-  CardMedia,
-} from "@mui/material";
-import { Delete, Close } from "@mui/icons-material";
+import { Box, IconButton, Modal, Slider } from "@mui/material";
+import { Delete, Close, ZoomIn, ZoomOut } from "@mui/icons-material";
+import { Gallery } from "react-grid-gallery";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -33,6 +27,8 @@ const ImageList = ({
   setFiles,
   isDeletable = false,
 }: ImageListProps) => {
+  const [zoomLevel, setZoomLevel] = useState(300); // Default thumbnail width
+
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
@@ -44,67 +40,69 @@ const ImageList = ({
     await deleteImage(publicId, resourceType);
   };
 
-  const onClickCard = (e, index) => {
-    e.preventDefault();
+  const onClickCard = (index: number) => {
     setSelectedIndex(index);
   };
 
-  const renderPreview = (file: ICloudinaryFile, index: number) => {
-    return (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`asset-card-${index}`}>
-        <Card
-          sx={{ cursor: "pointer", position: "relative" }}
-          onClick={(e) => onClickCard(e, index)}
-        >
-          {file.type === "image" ? (
-            <CardMedia
-              component="img"
-              image={file.url}
-              alt="Uploaded image"
-              style={{
-                width: "100%",
-                minHeight: "300px",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <video
-              key={file.thumbnail}
-              controls
-              src={file.url}
-              poster={file.thumbnail}
-              style={{
-                width: "100%",
-                minHeight: "300px",
-                objectFit: "cover",
-              }}
-              preload="metadata"
-              onClick={(e) => onClickCard(e, index)}
-            />
-          )}
-          {isDeletable && (
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 5,
-                right: 5,
-                bgcolor: "rgba(255,255,255,0.7)",
-              }}
-              onClick={(e) => handleDelete(e, index, file.publicId, file.type)}
-            >
-              <Delete />
-            </IconButton>
-          )}
-        </Card>
-      </Grid>
-    );
-  };
+  const images = files.map((file, index) => ({
+    src: file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
+    thumbnail:
+      file.type === "image" ? `${file.url}?q=100&fm=jpg` : file.thumbnail,
+    thumbnailWidth: zoomLevel, // Dynamically adjust width based on zoom level
+    thumbnailHeight: zoomLevel, // Dynamically adjust height based on zoom level
+    width: zoomLevel, // Add width property
+    height: zoomLevel, // Add height property
+    customOverlay: isDeletable ? (
+      <IconButton
+        sx={{
+          position: "absolute",
+          top: 5,
+          right: 5,
+          bgcolor: "rgba(255,255,255,0.7)",
+        }}
+        onClick={(e) => handleDelete(e, index, file.publicId, file.type)}
+      >
+        <Delete />
+      </IconButton>
+    ) : null,
+    isVideo: file.type === "video",
+    videoSrc: file.url,
+  }));
 
   return (
     <>
-      <Grid container spacing={2}>
-        {files.map((file, index) => renderPreview(file, index))}
-      </Grid>
+      {/* Zoom Controls */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 2,
+        }}
+      >
+        <IconButton onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}>
+          <ZoomOut />
+        </IconButton>
+        <Slider
+          value={zoomLevel}
+          onChange={(e, value) => setZoomLevel(value as number)}
+          min={100}
+          max={500}
+          step={50}
+          sx={{ width: "200px", mx: 2 }}
+        />
+        <IconButton onClick={() => setZoomLevel((prev) => Math.min(prev + 50, 500))}>
+          <ZoomIn />
+        </IconButton>
+      </Box>
+
+      <Gallery
+        images={images}
+        enableImageSelection={false}
+        margin={5} // Add margin between items
+        rowHeight={zoomLevel} // Dynamically adjust row height based on zoom level
+        onClick={(index) => onClickCard(index)}
+      />
 
       <Modal
         open={selectedIndex !== null}
