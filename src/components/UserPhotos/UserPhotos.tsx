@@ -1,20 +1,18 @@
 import React, { useState } from "react";
-import ImageList from "components/ImageList/ImageList";
+import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 import { ICloudinaryFile } from "types";
 import { Box, Typography } from "@mui/material";
 
-type IImageUploaderProps = {
-  files: ICloudinaryFile[];
-  setFiles: React.Dispatch<React.SetStateAction<ICloudinaryFile[]>>;
-  userEmail: string | undefined;
+type IUserPhotosProps = {
+  loggedUserFiles: ICloudinaryFile[];
+  setLoggedUserFiles: React.Dispatch<React.SetStateAction<ICloudinaryFile[]>>;
 };
 
-const ImageUploader = ({ files, setFiles, userEmail }: IImageUploaderProps) => {
+const UserPhotos = ({
+  loggedUserFiles,
+  setLoggedUserFiles,
+}: IUserPhotosProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-
-  const loggedUserFiles = files.filter((file) =>
-    userEmail ? file.tags.includes(userEmail) : false
-  );
 
   if (!loggedUserFiles.length) {
     return (
@@ -37,18 +35,18 @@ const ImageUploader = ({ files, setFiles, userEmail }: IImageUploaderProps) => {
   return (
     <>
       <Typography variant="h5" textAlign="left" sx={{ mb: 2 }}>
-        Your photos:
+        My photos:
       </Typography>
 
-      <ImageList
+      <PhotoDisplayGrid
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
         files={loggedUserFiles}
-        setFiles={setFiles}
+        setFiles={setLoggedUserFiles}
         isDeletable={true}
       />
     </>
   );
 };
 
-export default ImageUploader;
+export default UserPhotos;

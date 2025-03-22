@@ -13,13 +13,13 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { ImageListWrapper, SwiperWrapper } from "./ImageList.styles";
+import { ImageListWrapper, SwiperWrapper } from "./PhotoDisplayGrid.styles";
 import { ICloudinaryFile } from "types";
-import { deleteImage } from "api/cloudinary";
+import { deletePhoto } from "api/cloudinary";
 
 const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 
-interface ImageListProps {
+interface IPhotoDisplayGridProps {
   selectedIndex: number | null;
   files: ICloudinaryFile[];
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
@@ -27,13 +27,13 @@ interface ImageListProps {
   isDeletable?: boolean;
 }
 
-const ImageList = ({
+const PhotoDisplayGrid = ({
   selectedIndex,
   files,
   setSelectedIndex,
   setFiles,
   isDeletable = false,
-}: ImageListProps) => {
+}: IPhotoDisplayGridProps) => {
   const [zoomLevel, setZoomLevel] = useState(150);
   const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -77,7 +77,7 @@ const ImageList = ({
   ) => {
     e.stopPropagation();
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    await deleteImage(publicId, files[index].type);
+    await deletePhoto(publicId, files[index].type);
   };
 
   const onClickCard = (index: number) => {
@@ -129,13 +129,13 @@ const ImageList = ({
         <IconButton
           onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}
         >
-          <ZoomOut sx={{ fontSize: 25 }} />
+          <ZoomOut sx={{ fontSize: 30 }} />
         </IconButton>
-        <Box sx={{ mx: 1, fontSize: "1.2rem" }}>{zoomLevel}px</Box>
+        <Box sx={{ mx: 1, fontSize: "1.4rem" }}>{zoomLevel}px</Box>
         <IconButton
           onClick={() => setZoomLevel((prev) => Math.min(prev + 50, 400))}
         >
-          <ZoomIn sx={{ fontSize: 25 }} />
+          <ZoomIn sx={{ fontSize: 30 }} />
         </IconButton>
       </Box>
 
@@ -148,11 +148,13 @@ const ImageList = ({
       />
 
       <Fab
-        color="primary"
+        color="default"
         aria-label="scroll-to-top"
         sx={{
+          width: 45,
+          height: 45,
           position: "fixed",
-          bottom: 60,
+          bottom: 72,
           right: "50%",
           transform: showScrollButton
             ? "translate(50%, 0)"
@@ -245,4 +247,4 @@ const ImageList = ({
   );
 };
 
-export default ImageList;
+export default PhotoDisplayGrid;

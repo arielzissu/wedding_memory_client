@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ICloudinaryFile } from "../../types";
 import { ContainImageGallery } from "./ImageGallery.style";
-import ImageList from "components/ImageList/ImageList";
+import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 import { Typography } from "@mui/material";
 
 interface ImageGalleryProps {
@@ -18,7 +18,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ files, setFiles }) => {
         Image Gallery:
       </Typography>
 
-      <ImageList
+      <PhotoDisplayGrid
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
         files={files}

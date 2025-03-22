@@ -1,5 +1,5 @@
 import React, { SyntheticEvent, useEffect, useRef, useState } from "react";
-import ImageUploaderModal from "./components/ImageUploader/ImageUploader";
+import UserPhotos from "./components/UserPhotos/UserPhotos";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import AdminPage from "components/AdminPage/AdminPage";
 import {
@@ -14,11 +14,15 @@ import {
   Fab,
   CircularProgress,
 } from "@mui/material";
-import { CloudUpload, Image, AdminPanelSettings } from "@mui/icons-material";
+import {
+  CloudUpload,
+  Image,
+  AdminPanelSettings,
+  PhotoCamera,
+} from "@mui/icons-material";
 import Header from "components/Header/Header";
 import { ICloudinaryFile, ILocalUser } from "types";
-import { getImages, uploadImages } from "api/cloudinary";
-
+import { fetchPhotos, uploadPhotos } from "api/cloudinary";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 
@@ -27,6 +31,7 @@ const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
 
 export const App = () => {
   const [files, setFiles] = useState<ICloudinaryFile[]>([]);
+  const [loggedUserFiles, setLoggedUserFiles] = useState<ICloudinaryFile[]>([]);
   const [value, setValue] = useState<number>(0);
   const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
   const [user, setUser] = useState<ILocalUser>();
@@ -45,23 +50,28 @@ export const App = () => {
   };
 
   const fetchImages = async () => {
-    const response = await getImages(relevantFile, userEmail);
-    const oldImageList = [...response.images, ...response.videos];
+    const photosResponse = await fetchPhotos(relevantFile);
+    const oldImageList = [...photosResponse.images, ...photosResponse.videos];
     setFiles((prevFiles) => [...prevFiles, ...oldImageList]);
   };
 
   useEffect(() => {
+    getUserEmail();
     fetchImages();
-  }, [userEmail]);
+  }, []);
 
   useEffect(() => {
-    getUserEmail();
-  }, []);
+    setLoggedUserFiles(
+      files.filter((file) =>
+        userEmail ? file.tags.includes(userEmail) : false
+      )
+    );
+  }, [files]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsFiveSecondsPassed(true);
-    }, 7000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -92,7 +102,7 @@ export const App = () => {
 
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > MAX_SIZE_IN_BYTES) {
-      console.warn("The total file size exceeds 0.5 GB.");
+      console.warn(`The total file size exceeds ${MAX_SIZE_IN_GB} GB.`);
       return;
     }
 
@@ -102,13 +112,18 @@ export const App = () => {
 
     try {
       setIsLoadingUpload(true);
-      const uploadImagesResponse = await uploadImages(
+      const uploadPhotosResponse = await uploadPhotos(
         formData,
         relevantFile,
         userEmail
       );
-      const uploadedImage = uploadImagesResponse.imageUrls;
-      setFiles((prevFiles) => [...prevFiles, ...uploadedImage]);
+      const uploadedPhotos = uploadPhotosResponse.imageUrls;
+      setFiles((prevFiles) => [...prevFiles, ...uploadedPhotos]);
+      setLoggedUserFiles((prevFiles) =>
+        [...prevFiles, ...uploadedPhotos].filter((file) =>
+          userEmail ? file.tags.includes(userEmail) : false
+        )
+      );
     } catch (err) {
       console.error("Upload failed", err);
     } finally {
@@ -127,6 +142,7 @@ export const App = () => {
     removeFromLocalStorage(USER_EMAIL_KEY);
     setUser(undefined);
     setFiles([]);
+    setLoggedUserFiles([]);
     setUserEmail(undefined);
   };
 
@@ -142,10 +158,9 @@ export const App = () => {
 
       <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7 }}>
         {value === 0 && (
-          <ImageUploaderModal
-            files={files}
-            setFiles={setFiles}
-            userEmail={userEmail}
+          <UserPhotos
+            loggedUserFiles={loggedUserFiles}
+            setLoggedUserFiles={setLoggedUserFiles}
           />
         )}
         {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
@@ -202,14 +217,15 @@ export const App = () => {
           bottom: 0,
           left: 0,
           right: 0,
+          height: 64,
           bgcolor: "background.paper",
           boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
         }}
       >
         <BottomNavigationAction
-          label="Upload"
+          label="My Photos"
           showLabel
-          icon={<CloudUpload />}
+          icon={<PhotoCamera />}
           sx={{ color: value === 0 ? "primary.main" : "text.secondary" }}
         />
         <BottomNavigationAction

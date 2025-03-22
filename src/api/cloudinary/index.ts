@@ -2,7 +2,7 @@ import { ResourceType } from "cloudinary";
 import { ICloudinaryFile } from "../../types";
 import { request } from "utils/api";
 
-export const getImages = async (
+export const fetchPhotos = async (
   relevantFile: string,
   userEmail?: string
 ): Promise<{
@@ -10,7 +10,7 @@ export const getImages = async (
   videos: ICloudinaryFile[];
 }> => {
   return await request({
-    uri: `/cloudinary/images`,
+    uri: `/cloudinary/photos`,
     method: "GET",
     params: {
       uploadCreator: userEmail,
@@ -31,7 +31,7 @@ export const getDownloadedFolderAssets = async (
   });
 };
 
-export const uploadImages = async (
+export const uploadPhotos = async (
   formData: FormData,
   relevantFile: string,
   userEmail: string
@@ -50,12 +50,12 @@ export const uploadImages = async (
   });
 };
 
-export const deleteImage = async (
+export const deletePhoto = async (
   publicId: string,
   resourceType: ResourceType
 ) => {
   return await request({
-    uri: `/cloudinary/image`,
+    uri: `/cloudinary/photo`,
     method: "DELETE",
     data: {
       publicId,
