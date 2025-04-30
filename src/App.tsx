@@ -6,7 +6,7 @@ import {
   getFromLocalStorage,
   removeFromLocalStorage,
 } from "utils/localStorage";
-import LoginModal, { USER_EMAIL_KEY } from "components/Login/Login";
+import LoginModal, { USER_DATA_KEY } from "components/Login/Login";
 import {
   Box,
   BottomNavigation,
@@ -21,7 +21,7 @@ import {
   PhotoCamera,
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
-import { ICloudinaryFile, ILocalUser } from "types";
+import { ITelegramFile, ILocalUser } from "types";
 import { fetchPhotos, uploadPhotos } from "api/cloudinary";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
@@ -30,8 +30,8 @@ const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
 
 export const App = () => {
-  const [files, setFiles] = useState<ICloudinaryFile[]>([]);
-  const [loggedUserFiles, setLoggedUserFiles] = useState<ICloudinaryFile[]>([]);
+  const [files, setFiles] = useState<ITelegramFile[]>([]);
+  const [loggedUserFiles, setLoggedUserFiles] = useState<ITelegramFile[]>([]);
   const [value, setValue] = useState<number>(0);
   const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
   const [user, setUser] = useState<ILocalUser>();
@@ -43,7 +43,7 @@ export const App = () => {
   const relevantFile = getUrlSearchParams("f");
 
   const getUserEmail = () => {
-    const localStorageEmail = getFromLocalStorage(USER_EMAIL_KEY);
+    const localStorageEmail = getFromLocalStorage(USER_DATA_KEY);
     if (localStorageEmail) {
       setUserEmail(localStorageEmail.email);
     }
@@ -51,8 +51,7 @@ export const App = () => {
 
   const fetchImages = async () => {
     const photosResponse = await fetchPhotos(relevantFile);
-    const oldImageList = [...photosResponse.images, ...photosResponse.videos];
-    setFiles((prevFiles) => [...prevFiles, ...oldImageList]);
+    setFiles((prevFiles) => [...prevFiles, ...photosResponse]);
   };
 
   useEffect(() => {
@@ -61,12 +60,10 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    setLoggedUserFiles(
-      files.filter((file) =>
-        userEmail ? file.tags.includes(userEmail) : false
-      )
-    );
-  }, [files]);
+    if (!userEmail) return;
+    const userFiles = files.filter((file) => file.uploadCreator === userEmail);
+    setLoggedUserFiles(userFiles);
+  }, [files, userEmail]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,9 +93,9 @@ export const App = () => {
       setIsOpenLoginModal(true);
       return;
     }
+
     const inputFiles = event.target.files;
     const selectedFiles: File[] = Array.from(inputFiles);
-    const formData = new FormData();
 
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > MAX_SIZE_IN_BYTES) {
@@ -106,24 +103,21 @@ export const App = () => {
       return;
     }
 
+    const formData = new FormData();
     selectedFiles.forEach((file) => {
-      formData.append("images", file);
+      formData.append("photos", file);
     });
 
     try {
       setIsLoadingUpload(true);
-      const uploadPhotosResponse = await uploadPhotos(
+
+      const uploadedFile = await uploadPhotos(
         formData,
         relevantFile,
         userEmail
       );
-      const uploadedPhotos = uploadPhotosResponse.imageUrls;
-      setFiles((prevFiles) => [...prevFiles, ...uploadedPhotos]);
-      setLoggedUserFiles((prevFiles) =>
-        [...prevFiles, ...uploadedPhotos].filter((file) =>
-          userEmail ? file.tags.includes(userEmail) : false
-        )
-      );
+
+      setFiles((prevFiles) => [...prevFiles, ...uploadedFile]);
     } catch (err) {
       console.error("Upload failed", err);
     } finally {
@@ -132,14 +126,14 @@ export const App = () => {
   };
 
   useEffect(() => {
-    const localUser = getFromLocalStorage(USER_EMAIL_KEY);
+    const localUser = getFromLocalStorage(USER_DATA_KEY);
     setUser(localUser);
     const isAdmin = localUser && localUser.email === "arielzissu98@gmail.com";
     setIsAdminUser(isAdmin);
   }, []);
 
   const handleSignOut = () => {
-    removeFromLocalStorage(USER_EMAIL_KEY);
+    removeFromLocalStorage(USER_DATA_KEY);
     setUser(undefined);
     setFiles([]);
     setLoggedUserFiles([]);
@@ -181,8 +175,8 @@ export const App = () => {
               boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
             },
             "50%": {
-              transform: "scale(1.1)",
-              boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.2)",
+              transform: "scale(1.15)",
+              boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.4)",
             },
             "100%": {
               transform: "scale(1)",

@@ -1,20 +1,35 @@
-import { ResourceType } from "cloudinary";
-import { ICloudinaryFile } from "../../types";
+import { ITelegramFile } from "../../types";
 import { request } from "utils/api";
 
 export const fetchPhotos = async (
   relevantFile: string,
   userEmail?: string
-): Promise<{
-  images: ICloudinaryFile[];
-  videos: ICloudinaryFile[];
-}> => {
+): Promise<ITelegramFile[]> => {
   return await request({
-    uri: `/cloudinary/photos`,
+    uri: `/telegram-storage/photos`,
     method: "GET",
     params: {
       uploadCreator: userEmail,
       relevantFolder: relevantFile,
+    },
+  });
+};
+
+export const uploadPhotos = async (
+  formData: FormData,
+  relevantFile: string,
+  userEmail: string
+) => {
+  return await request({
+    uri: `/telegram-storage/upload`,
+    method: "POST",
+    data: formData,
+    params: {
+      uploadCreator: userEmail,
+      relevantFolder: relevantFile,
+    },
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
   });
 };
@@ -31,35 +46,13 @@ export const getDownloadedFolderAssets = async (
   });
 };
 
-export const uploadPhotos = async (
-  formData: FormData,
-  relevantFile: string,
-  userEmail: string
-) => {
+export const deletePhoto = async (messageId: number, userEmail: string) => {
   return await request({
-    uri: `/cloudinary/upload`,
-    method: "POST",
-    data: formData,
-    params: {
-      uploadCreator: userEmail,
-      relevantFolder: relevantFile,
-    },
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-
-export const deletePhoto = async (
-  publicId: string,
-  resourceType: ResourceType
-) => {
-  return await request({
-    uri: `/cloudinary/photo`,
+    uri: `/telegram-storage/photo`,
     method: "DELETE",
     data: {
-      publicId,
-      resourceType,
+      messageId,
+      userEmail,
     },
   });
 };

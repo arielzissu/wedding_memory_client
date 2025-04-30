@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { ICloudinaryFile } from "../../types";
+import { ITelegramFile } from "../../types";
 import { ContainImageGallery } from "./ImageGallery.style";
 import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 import { Typography } from "@mui/material";
 
 interface ImageGalleryProps {
-  files: ICloudinaryFile[];
-  setFiles: React.Dispatch<React.SetStateAction<ICloudinaryFile[]>>;
+  files: ITelegramFile[];
+  setFiles: React.Dispatch<React.SetStateAction<ITelegramFile[]>>;
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ files, setFiles }) => {

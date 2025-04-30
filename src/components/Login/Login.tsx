@@ -5,7 +5,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { saveToLocalStorage } from "../../utils/localStorage";
 import { ILocalUser } from "types";
 
-export const USER_EMAIL_KEY = "userEmail";
+export const USER_DATA_KEY = "userData";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 interface GoogleLoginModalProps {
@@ -19,7 +19,7 @@ const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
       const decodedToken: ILocalUser & JwtPayload = jwtDecode(
         credentialResponse.credential
       );
-      saveToLocalStorage(USER_EMAIL_KEY, {
+      saveToLocalStorage(USER_DATA_KEY, {
         email: decodedToken.email,
         name: decodedToken.name,
         picture: decodedToken.picture,

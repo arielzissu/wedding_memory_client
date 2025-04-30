@@ -1,11 +1,14 @@
-import { ResourceType } from "cloudinary";
+export type TResourceType = "image" | "video";
 
-export interface ICloudinaryFile {
-  url: string;
-  publicId: string;
-  type: ResourceType;
+export interface ITelegramFile {
+  fileId: string;
+  messageId: number;
   thumbnail: string;
-  tags: string[];
+  caption: string;
+  publicId: string;
+  type: TResourceType;
+  url: string;
+  uploadCreator?: string;
 }
 
 export interface ILocalUser {

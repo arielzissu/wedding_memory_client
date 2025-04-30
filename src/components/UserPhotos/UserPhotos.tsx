@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
-import { ICloudinaryFile } from "types";
+import { ITelegramFile } from "types";
 import { Box, Typography } from "@mui/material";
 
 type IUserPhotosProps = {
-  loggedUserFiles: ICloudinaryFile[];
-  setLoggedUserFiles: React.Dispatch<React.SetStateAction<ICloudinaryFile[]>>;
+  loggedUserFiles: ITelegramFile[];
+  setLoggedUserFiles: React.Dispatch<React.SetStateAction<ITelegramFile[]>>;
 };
 
 const UserPhotos = ({
