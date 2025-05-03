@@ -101,20 +101,41 @@ const PhotoDisplayGrid = ({
       thumbnailHeight: zoomLevel,
       width: zoomLevel,
       height: zoomLevel,
-      customOverlay: isDeletable ? (
-        <IconButton
-          sx={{
-            position: "absolute",
-            top: 5,
-            right: 5,
-            bgcolor: "rgba(255,255,255,0.7)",
-            pointerEvents: "auto",
-          }}
-          onClick={(e) => handleDelete(e, index, file.messageId)}
-        >
-          <Delete />
-        </IconButton>
-      ) : null,
+      customOverlay: (
+        <>
+          {isDeletable && (
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                bgcolor: "rgba(255,255,255,0.7)",
+                pointerEvents: "auto",
+              }}
+              onClick={(e) => handleDelete(e, index, file.messageId)}
+            >
+              <Delete />
+            </IconButton>
+          )}
+          {file.type === "video" && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                background: "rgba(0,0,0,0.5)",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                fontSize: "14px",
+              }}
+            >
+              ▶
+            </div>
+          )}
+        </>
+      ),
       isVideo: file.type === "video",
       videoSrc: file.url,
     };
