@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_URL } from "../constants";
+import snackbarStore from "stores/snackbarStore";
 
 export const request = async ({ url, uri, method, ...rest }: any) => {
   try {
@@ -10,8 +11,13 @@ export const request = async ({ url, uri, method, ...rest }: any) => {
     });
 
     return response.data;
-  } catch (error) {
-    console.error("Error in request:", error);
+  } catch (error: any) {
+    const errMsg =
+      error?.response?.data?.message ||
+      error?.message ||
+      `Failed Request. [URL=${url}]`;
+
+    snackbarStore.show(errMsg, "error");
     throw error;
   }
 };

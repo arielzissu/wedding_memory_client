@@ -22,9 +22,10 @@ import {
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
 import { ITelegramFile, ILocalUser } from "types";
-import { fetchPhotos, uploadPhotos } from "api/cloudinary";
+import { fetchPhotos, uploadPhotos } from "api/telegramStorage";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
+import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -147,103 +148,106 @@ export const App = () => {
   const shouldShowUploadButton = !userEmail && isFiveSecondsPassed;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
+    <>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
 
-      <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7 }}>
-        {value === 0 && (
-          <UserPhotos
-            loggedUserFiles={loggedUserFiles}
-            setLoggedUserFiles={setLoggedUserFiles}
-          />
-        )}
-        {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-        {value === 2 && isAdminUser && <AdminPage />}
-      </Box>
+        <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7 }}>
+          {value === 0 && (
+            <UserPhotos
+              loggedUserFiles={loggedUserFiles}
+              setLoggedUserFiles={setLoggedUserFiles}
+            />
+          )}
+          {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
+          {value === 2 && isAdminUser && <AdminPage />}
+        </Box>
 
-      <Fab
-        color="primary"
-        aria-label="upload"
-        sx={{
-          position: "fixed",
-          bottom: 80,
-          right: 16,
-          animation: shouldShowUploadButton ? "pulse 1.5s infinite" : "none",
-          "@keyframes pulse": {
-            "0%": {
-              transform: "scale(1)",
-              boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
+        <Fab
+          color="primary"
+          aria-label="upload"
+          sx={{
+            position: "fixed",
+            bottom: 80,
+            right: 16,
+            animation: shouldShowUploadButton ? "pulse 1.5s infinite" : "none",
+            "@keyframes pulse": {
+              "0%": {
+                transform: "scale(1)",
+                boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
+              },
+              "50%": {
+                transform: "scale(1.15)",
+                boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.4)",
+              },
+              "100%": {
+                transform: "scale(1)",
+                boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
+              },
             },
-            "50%": {
-              transform: "scale(1.15)",
-              boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.4)",
-            },
-            "100%": {
-              transform: "scale(1)",
-              boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
-            },
-          },
-        }}
-        onClick={onClickFileInput}
-        disabled={isLoadingUpload}
-      >
-        {isLoadingUpload ? (
-          <CircularProgress size={24} color="inherit" />
-        ) : (
-          <CloudUpload />
-        )}
-      </Fab>
+          }}
+          onClick={onClickFileInput}
+          disabled={isLoadingUpload}
+        >
+          {isLoadingUpload ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            <CloudUpload />
+          )}
+        </Fab>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept={SUPPORTED_MEDIA_FORMATS.join()}
-        hidden
-        onChange={handleFileChange}
-      />
-
-      <BottomNavigation
-        value={value}
-        onChange={handleChange}
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 64,
-          bgcolor: "background.paper",
-          boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
-        }}
-      >
-        <BottomNavigationAction
-          label="My Photos"
-          showLabel
-          icon={<PhotoCamera />}
-          sx={{ color: value === 0 ? "primary.main" : "text.secondary" }}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={SUPPORTED_MEDIA_FORMATS.join()}
+          hidden
+          onChange={handleFileChange}
         />
-        <BottomNavigationAction
-          label="Gallery"
-          showLabel
-          icon={<Image />}
-          sx={{ color: value === 1 ? "primary.main" : "text.secondary" }}
-        />
-        {isAdminUser && (
+
+        <BottomNavigation
+          value={value}
+          onChange={handleChange}
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 64,
+            bgcolor: "background.paper",
+            boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
+          }}
+        >
           <BottomNavigationAction
-            label="Admin"
+            label="My Photos"
             showLabel
-            icon={<AdminPanelSettings />}
-            sx={{ color: value === 2 ? "primary.main" : "text.secondary" }}
+            icon={<PhotoCamera />}
+            sx={{ color: value === 0 ? "primary.main" : "text.secondary" }}
+          />
+          <BottomNavigationAction
+            label="Gallery"
+            showLabel
+            icon={<Image />}
+            sx={{ color: value === 1 ? "primary.main" : "text.secondary" }}
+          />
+          {isAdminUser && (
+            <BottomNavigationAction
+              label="Admin"
+              showLabel
+              icon={<AdminPanelSettings />}
+              sx={{ color: value === 2 ? "primary.main" : "text.secondary" }}
+            />
+          )}
+        </BottomNavigation>
+
+        {isOpenLoginModal && (
+          <LoginModal
+            isOpen={isOpenLoginModal}
+            onClose={() => setIsOpenLoginModal(false)}
           />
         )}
-      </BottomNavigation>
-
-      {isOpenLoginModal && (
-        <LoginModal
-          isOpen={isOpenLoginModal}
-          onClose={() => setIsOpenLoginModal(false)}
-        />
-      )}
-    </Box>
+      </Box>
+      <GlobalSnackbar />
+    </>
   );
 };

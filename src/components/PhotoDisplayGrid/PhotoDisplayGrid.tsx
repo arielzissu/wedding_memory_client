@@ -15,7 +15,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { ImageListWrapper, SwiperWrapper } from "./PhotoDisplayGrid.styles";
 import { ITelegramFile } from "types";
-import { deletePhoto } from "api/cloudinary";
+import { deletePhoto } from "api/telegramStorage";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
 
@@ -95,8 +95,8 @@ const PhotoDisplayGrid = ({
 
   const photos = files.map((file, index) => {
     return {
-      src: file.type === "image" ? file.url : file.thumbnail,
-      thumbnail: file.type === "image" ? file.url : file.thumbnail,
+      src: file.type === "photo" ? file.url : file.thumbnail,
+      thumbnail: file.type === "photo" ? file.url : file.thumbnail,
       thumbnailWidth: zoomLevel,
       thumbnailHeight: zoomLevel,
       width: zoomLevel,
@@ -223,7 +223,7 @@ const PhotoDisplayGrid = ({
             >
               {files.map((file, index) => (
                 <SwiperSlide key={index}>
-                  {file.type === "image" ? (
+                  {file.type === "photo" ? (
                     <img
                       key={file.publicId}
                       src={file.url}

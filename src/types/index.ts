@@ -1,4 +1,4 @@
-export type TResourceType = "image" | "video";
+export type TResourceType = "photo" | "video";
 
 export interface ITelegramFile {
   fileId: string;
