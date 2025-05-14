@@ -208,6 +208,9 @@ const PhotoDisplayGrid = ({
             p: 2,
             width: "90%",
             maxWidth: "600px",
+            height: "98%",
+            borderRadius: 8,
+            overflow: "hidden",
           }}
         >
           <IconButton
@@ -253,6 +256,7 @@ const PhotoDisplayGrid = ({
                         width: "100%",
                         height: "auto",
                         borderRadius: "10px",
+                        maxHeight: "95vh",
                       }}
                     />
                   ) : (
@@ -261,7 +265,11 @@ const PhotoDisplayGrid = ({
                       controls
                       src={file.url}
                       poster={file.thumbnail}
-                      style={{ width: "100%", height: "auto" }}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        maxHeight: "95vh",
+                      }}
                     />
                   )}
                 </SwiperSlide>
