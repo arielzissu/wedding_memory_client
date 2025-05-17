@@ -19,6 +19,7 @@ import {
   Image,
   AdminPanelSettings,
   PhotoCamera,
+  People as PeopleIcon,
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
 import { ITelegramFile, ILocalUser } from "types";
@@ -26,6 +27,7 @@ import { fetchPhotos, uploadPhotos } from "api/telegramStorage";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
+import PeopleGallery from "components/PeopleGallery/PeopleGallery";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -52,7 +54,9 @@ export const App = () => {
 
   const fetchImages = async () => {
     const photosResponse = await fetchPhotos(relevantFile);
-    setFiles((prevFiles) => [...prevFiles, ...photosResponse]);
+    if (photosResponse?.length > 0) {
+      setFiles((prevFiles) => [...prevFiles, ...photosResponse]);
+    }
   };
 
   useEffect(() => {
@@ -160,7 +164,8 @@ export const App = () => {
             />
           )}
           {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-          {value === 2 && isAdminUser && <AdminPage />}
+          {value === 2 && <PeopleGallery files={files} />}
+          {value === 3 && isAdminUser && <AdminPage />}
         </Box>
 
         <Fab
@@ -230,12 +235,18 @@ export const App = () => {
             icon={<Image />}
             sx={{ color: value === 1 ? "primary.main" : "text.secondary" }}
           />
+          <BottomNavigationAction
+            label="People"
+            showLabel
+            icon={<PeopleIcon />}
+            sx={{ color: value === 2 ? "primary.main" : "text.secondary" }}
+          />
           {isAdminUser && (
             <BottomNavigationAction
               label="Admin"
               showLabel
               icon={<AdminPanelSettings />}
-              sx={{ color: value === 2 ? "primary.main" : "text.secondary" }}
+              sx={{ color: value === 3 ? "primary.main" : "text.secondary" }}
             />
           )}
         </BottomNavigation>

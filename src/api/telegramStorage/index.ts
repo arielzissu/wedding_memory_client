@@ -1,4 +1,4 @@
-import { ITelegramFile } from "../../types";
+import { IPeople, ITelegramFile } from "../../types";
 import { request } from "utils/api";
 
 export const fetchPhotos = async (
@@ -14,6 +14,15 @@ export const fetchPhotos = async (
     },
   });
 };
+
+export const fetchPeople = async (): Promise<IPeople[]> => {
+  return await request({
+    uri: `/telegram-storage/people`,
+    method: "GET",
+  });
+};
+
+
 
 export const uploadPhotos = async (
   formData: FormData,

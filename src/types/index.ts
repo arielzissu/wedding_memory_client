@@ -16,3 +16,10 @@ export interface ILocalUser {
   email: string;
   picture: string;
 }
+
+export interface IPeople {
+  personId: string;
+  faceCount: number;
+  mediaItems: ITelegramFile[];
+  sampleThumbnail: string;
+}
