@@ -1,7 +1,7 @@
 import React, { SyntheticEvent, useEffect, useRef, useState } from "react";
-import UserPhotos from "./components/UserPhotos/UserPhotos";
+// import UserPhotos from "./components/UserPhotos/UserPhotos";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
-import AdminPage from "components/AdminPage/AdminPage";
+// import AdminPage from "components/AdminPage/AdminPage";
 import {
   getFromLocalStorage,
   removeFromLocalStorage,
@@ -22,19 +22,20 @@ import {
   People as PeopleIcon,
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
-import { ITelegramFile, ILocalUser } from "types";
+import { ITelegramFile, ILocalUser, IR2File } from "types";
 import { fetchPhotos, uploadPhotos } from "api/telegramStorage";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
 import PeopleGallery from "components/PeopleGallery/PeopleGallery";
+import UserPhotos from "components/UserPhotos/UserPhotos";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
 
 export const App = () => {
-  const [files, setFiles] = useState<ITelegramFile[]>([]);
-  const [loggedUserFiles, setLoggedUserFiles] = useState<ITelegramFile[]>([]);
+  const [files, setFiles] = useState<IR2File[]>([]);
+  const [loggedUserFiles, setLoggedUserFiles] = useState<IR2File[]>([]);
   const [value, setValue] = useState<number>(0);
   const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
   const [user, setUser] = useState<ILocalUser>();
@@ -53,7 +54,8 @@ export const App = () => {
   };
 
   const fetchImages = async () => {
-    const photosResponse = await fetchPhotos(relevantFile);
+    const fetchResponse = await fetchPhotos(relevantFile);
+    const photosResponse = fetchResponse.photos;
     if (photosResponse?.length > 0) {
       setFiles((prevFiles) => [...prevFiles, ...photosResponse]);
     }
@@ -66,7 +68,9 @@ export const App = () => {
 
   useEffect(() => {
     if (!userEmail) return;
-    const userFiles = files.filter((file) => file.uploadCreator === userEmail);
+    const userFiles = files.filter(
+      (file) => file.metadata.uploader === userEmail
+    );
     setLoggedUserFiles(userFiles);
   }, [files, userEmail]);
 
@@ -116,11 +120,17 @@ export const App = () => {
     try {
       setIsLoadingUpload(true);
 
-      const uploadedFile = await uploadPhotos(
+      const uploadedFileResponse = await uploadPhotos(
         formData,
         relevantFile,
         userEmail
       );
+
+      const uploadedFile = uploadedFileResponse.files.map(
+        (file) => file.fileName
+      );
+
+      console.log("uploadedFile: ", uploadedFile);
 
       setFiles((prevFiles) => [...prevFiles, ...uploadedFile]);
     } catch (err) {
@@ -164,8 +174,8 @@ export const App = () => {
             />
           )}
           {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-          {value === 2 && <PeopleGallery files={files} />}
-          {value === 3 && isAdminUser && <AdminPage />}
+          {/* {value === 2 && <PeopleGallery files={files} />}
+          {value === 3 && isAdminUser && <AdminPage />} */}
         </Box>
 
         <Fab

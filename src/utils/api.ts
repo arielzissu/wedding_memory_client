@@ -10,6 +10,16 @@ export const request = async ({ url, uri, method, ...rest }: any) => {
       ...rest,
     });
 
+    if (response.data?.success === false) {
+      const errMsg =
+        response.data?.message ||
+        response.data?.error ||
+        `Failed Request. [URL=${url}]`;
+
+      snackbarStore.show(errMsg, "error");
+      throw new Error(errMsg);
+    }
+
     return response.data;
   } catch (error: any) {
     const errMsg =

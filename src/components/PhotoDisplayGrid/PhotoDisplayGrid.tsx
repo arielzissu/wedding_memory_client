@@ -14,7 +14,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { ImageListWrapper, SwiperWrapper } from "./PhotoDisplayGrid.styles";
-import { ITelegramFile } from "types";
+import { IR2File } from "types";
 import { deletePhoto } from "api/telegramStorage";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
@@ -23,9 +23,9 @@ const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 
 interface IPhotoDisplayGridProps {
   selectedIndex: number | null;
-  files: ITelegramFile[];
+  files: IR2File[];
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  setFiles: React.Dispatch<React.SetStateAction<ITelegramFile[]>>;
+  setFiles: React.Dispatch<React.SetStateAction<IR2File[]>>;
   isDeletable?: boolean;
 }
 
@@ -40,6 +40,8 @@ const PhotoDisplayGrid = ({
   const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  console.log('[PhotoDisplayGrid] - files!!!!!!!: ', files);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -75,12 +77,12 @@ const PhotoDisplayGrid = ({
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
-    messageId: number
+    fileName: string
   ) => {
     e.stopPropagation();
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     const userData = getFromLocalStorage(USER_DATA_KEY);
-    await deletePhoto(messageId, userData.email);
+    await deletePhoto(userData.email, fileName);
   };
 
   const onClickCard = (index: number) => {
@@ -95,8 +97,8 @@ const PhotoDisplayGrid = ({
 
   const photos = files.map((file, index) => {
     return {
-      src: file.type === "photo" ? file.url : file.thumbnail,
-      thumbnail: file.type === "photo" ? file.url : file.thumbnail,
+      src: file.type === "photo" ? file.url : file.metadata.thumbnail_url,
+      thumbnail: file.type === "photo" ? file.url : file.metadata.thumbnail_url,
       thumbnailWidth: zoomLevel,
       thumbnailHeight: zoomLevel,
       width: zoomLevel,
@@ -112,7 +114,7 @@ const PhotoDisplayGrid = ({
                 bgcolor: "rgba(255,255,255,0.7)",
                 pointerEvents: "auto",
               }}
-              onClick={(e) => handleDelete(e, index, file.messageId)}
+              onClick={(e) => handleDelete(e, index, file.fileName)}
             >
               <Delete />
             </IconButton>
@@ -249,7 +251,7 @@ const PhotoDisplayGrid = ({
                 <SwiperSlide key={index}>
                   {file.type === "photo" ? (
                     <img
-                      key={file.publicId}
+                      key={`photo-${file.fileName}-${index}`}
                       src={file.url}
                       alt="Photo"
                       style={{
@@ -261,10 +263,10 @@ const PhotoDisplayGrid = ({
                     />
                   ) : (
                     <video
-                      key={file.publicId}
+                      key={`video-${file.fileName}-${index}`}
                       controls
                       src={file.url}
-                      poster={file.thumbnail}
+                      poster={file.metadata.thumbnail_url}
                       style={{
                         width: "100%",
                         height: "auto",
@@ -283,3 +285,5 @@ const PhotoDisplayGrid = ({
 };
 
 export default PhotoDisplayGrid;
+
+

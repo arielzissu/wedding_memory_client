@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { ITelegramFile } from "../../types";
+import { IR2File } from "../../types";
 import { ContainImageGallery } from "./ImageGallery.style";
 import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 import { Typography } from "@mui/material";
 
 interface ImageGalleryProps {
-  files: ITelegramFile[];
-  setFiles: React.Dispatch<React.SetStateAction<ITelegramFile[]>>;
+  files: IR2File[];
+  setFiles: React.Dispatch<React.SetStateAction<IR2File[]>>;
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ files, setFiles }) => {

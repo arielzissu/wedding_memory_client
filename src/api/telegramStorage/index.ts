@@ -1,28 +1,26 @@
-import { IPeople, ITelegramFile } from "../../types";
+import { IPeople, IR2File } from "../../types";
 import { request } from "utils/api";
 
 export const fetchPhotos = async (
   relevantFile: string,
   userEmail?: string
-): Promise<ITelegramFile[]> => {
+): Promise<{ success: boolean; photos: IR2File[] }> => {
   return await request({
-    uri: `/telegram-storage/photos`,
+    uri: `/r2/photos`,
     method: "GET",
     params: {
       uploadCreator: userEmail,
-      relevantFolder: relevantFile,
+      weddingName: relevantFile,
     },
   });
 };
 
 export const fetchPeople = async (): Promise<IPeople[]> => {
   return await request({
-    uri: `/telegram-storage/people`,
+    uri: `/r2/people`,
     method: "GET",
   });
 };
-
-
 
 export const uploadPhotos = async (
   formData: FormData,
@@ -30,12 +28,12 @@ export const uploadPhotos = async (
   userEmail: string
 ) => {
   return await request({
-    uri: `/telegram-storage/upload`,
+    uri: `/r2/upload`,
     method: "POST",
     data: formData,
     params: {
       uploadCreator: userEmail,
-      relevantFolder: relevantFile,
+      weddingName: relevantFile,
     },
     headers: {
       "Content-Type": "multipart/form-data",
@@ -55,13 +53,16 @@ export const getDownloadedFolderAssets = async (
   });
 };
 
-export const deletePhoto = async (messageId: number, userEmail: string) => {
+export const deletePhoto = async (
+  userEmail: string,
+  fileName: string
+) => {
   return await request({
-    uri: `/telegram-storage/photo`,
+    uri: `/r2/photo`,
     method: "DELETE",
     data: {
-      messageId,
       userEmail,
+      fileName,
     },
   });
 };
