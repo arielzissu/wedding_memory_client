@@ -20,6 +20,6 @@ export interface ILocalUser {
 export interface IPeople {
   personId: string;
   faceCount: number;
-  mediaItems: IR2File[];
+  mediaFiles: IR2File[];
   sampleThumbnail: string;
 }

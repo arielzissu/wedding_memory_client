@@ -21,6 +21,7 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
 
   const fetchPeopleData = async () => {
     const peopleRes = await fetchPeople();
+    console.log("peopleRes: ", peopleRes);
     setPeople(peopleRes);
   };
 
@@ -29,7 +30,7 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
   }, [files.length]);
 
   const renderPersonCard = (person) => {
-    if (!person.mediaItems?.length) return null;
+    if (!person.mediaFiles?.length) return null;
     return (
       <FaceCard
         key={person.personId}
@@ -41,10 +42,10 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
     );
   };
 
-  const renderMediaGrid = (mediaItems) => {
+  const renderMediaGrid = (mediaFiles) => {
     return (
       <MediaGrid>
-        {mediaItems?.map((item, i) => (
+        {mediaFiles?.map((item, i) => (
           <MediaImg key={i} src={item.url} alt={item.caption || "Face"} />
         ))}
       </MediaGrid>
@@ -60,7 +61,7 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
           <Button onClick={() => setSelectedPersonId(null)} sx={{ mb: 2 }}>
             ← Back to all people
           </Button>
-          {renderMediaGrid(selectedPerson?.mediaItems)}
+          {renderMediaGrid(selectedPerson?.mediaFiles)}
         </div>
       )}
     </div>

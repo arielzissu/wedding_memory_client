@@ -174,8 +174,8 @@ export const App = () => {
             />
           )}
           {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-          {/* {value === 2 && <PeopleGallery files={files} />}
-          {value === 3 && isAdminUser && <AdminPage />} */}
+          {value === 2 && <PeopleGallery files={files} />}
+          {/* {value === 3 && isAdminUser && <AdminPage />} */}
         </Box>
 
         <Fab

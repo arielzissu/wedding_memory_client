@@ -6,6 +6,7 @@ import {
   ZoomIn,
   ZoomOut,
   ArrowUpward,
+  Download,
 } from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -18,6 +19,7 @@ import { IR2File } from "types";
 import { deletePhoto } from "api/r2Upload";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
+import { downloadFile } from "utils/file";
 
 const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 
@@ -28,6 +30,7 @@ interface IPhotoDisplayGridProps {
   setFiles: React.Dispatch<React.SetStateAction<IR2File[]>>;
   isDeletable?: boolean;
 }
+
 
 const PhotoDisplayGrid = ({
   selectedIndex,
@@ -41,7 +44,7 @@ const PhotoDisplayGrid = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log('[PhotoDisplayGrid] - files!!!!!!!: ', files);
+  console.log("[PhotoDisplayGrid] - files!!!!!!!: ", files);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -95,6 +98,44 @@ const PhotoDisplayGrid = ({
     }
   };
 
+  const renderDownloadButton = (file) => (
+    // <IconButton
+    //   id="download-button"
+    //   onClick={() => downloadFile(file.url, file.fileName)}
+    //   sx={{
+    //     position: "absolute",
+    //     top: 12,
+    //     left: 12,
+    //     zIndex: 10,
+    //     bgcolor: "rgba(255,255,255,0.8)",
+    //     "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+    //   }}
+    // >
+    //   <svg
+    //     xmlns="http://www.w3.org/2000/svg"
+    //     height="24"
+    //     viewBox="0 0 24 24"
+    //     width="24"
+    //     fill="black"
+    //   >
+    //     <path d="M0 0h24v24H0z" fill="none" />
+    //     <path d="M5 20h14v-2H5v2zm7-18l-7 7h4v6h6v-6h4l-7-7z" />
+    //   </svg>
+    // </IconButton>
+    <IconButton
+      sx={{
+        position: "absolute",
+        top: 5,
+        left: 5,
+        bgcolor: "rgba(255,255,255,0.7)",
+        pointerEvents: "auto",
+      }}
+      onClick={() => downloadFile(file.url, file.fileName)}
+    >
+      <Download />
+    </IconButton>
+  );
+
   const photos = files.map((file, index) => {
     return {
       src: file.type === "photo" ? file.url : file.metadata.thumbnail_url,
@@ -136,6 +177,7 @@ const PhotoDisplayGrid = ({
               ▶
             </div>
           )}
+          {renderDownloadButton(file)}
         </>
       ),
       isVideo: file.type === "video",
@@ -249,31 +291,34 @@ const PhotoDisplayGrid = ({
             >
               {files.map((file, index) => (
                 <SwiperSlide key={index}>
-                  {file.type === "photo" ? (
-                    <img
-                      key={`photo-${file.fileName}-${index}`}
-                      src={file.url}
-                      alt="Photo"
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        borderRadius: "10px",
-                        maxHeight: "95vh",
-                      }}
-                    />
-                  ) : (
-                    <video
-                      key={`video-${file.fileName}-${index}`}
-                      controls
-                      src={file.url}
-                      poster={file.metadata.thumbnail_url}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        maxHeight: "95vh",
-                      }}
-                    />
-                  )}
+                  <Box sx={{ position: "relative" }}>
+                    {file.type === "photo" ? (
+                      <img
+                        key={`photo-${file.fileName}-${index}`}
+                        src={file.url}
+                        alt="Photo"
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          borderRadius: "10px",
+                          maxHeight: "95vh",
+                        }}
+                      />
+                    ) : (
+                      <video
+                        key={`video-${file.fileName}-${index}`}
+                        controls
+                        src={file.url}
+                        poster={file.metadata.thumbnail_url}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          maxHeight: "95vh",
+                        }}
+                      />
+                    )}
+                  </Box>
+                  {renderDownloadButton(file)}
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -285,5 +330,3 @@ const PhotoDisplayGrid = ({
 };
 
 export default PhotoDisplayGrid;
-
-
