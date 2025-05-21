@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Typography } from "@mui/material";
-import { fetchPeople } from "api/telegramStorage";
-import { IPeople, ITelegramFile } from "types";
+import { fetchPeople } from "api/r2Upload";
+import { IPeople, IR2File } from "types";
 import {
   FaceCard,
   FaceGrid,
@@ -11,7 +11,7 @@ import {
 } from "./PeopleGallery.style";
 
 interface PeopleGalleryProps {
-  files: ITelegramFile[];
+  files: IR2File[];
 }
 
 const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {

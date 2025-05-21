@@ -15,7 +15,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { ImageListWrapper, SwiperWrapper } from "./PhotoDisplayGrid.styles";
 import { IR2File } from "types";
-import { deletePhoto } from "api/telegramStorage";
+import { deletePhoto } from "api/r2Upload";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
 

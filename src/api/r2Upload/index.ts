@@ -53,10 +53,7 @@ export const getDownloadedFolderAssets = async (
   });
 };
 
-export const deletePhoto = async (
-  userEmail: string,
-  fileName: string
-) => {
+export const deletePhoto = async (userEmail: string, fileName: string) => {
   return await request({
     uri: `/r2/photo`,
     method: "DELETE",

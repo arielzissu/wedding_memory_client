@@ -22,8 +22,8 @@ import {
   People as PeopleIcon,
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
-import { ITelegramFile, ILocalUser, IR2File } from "types";
-import { fetchPhotos, uploadPhotos } from "api/telegramStorage";
+import { ILocalUser, IR2File } from "types";
+import { fetchPhotos, uploadPhotos } from "api/r2Upload";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";

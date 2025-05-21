@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Download } from "@mui/icons-material";
-import { getDownloadedFolderAssets } from "api/telegramStorage";
+import { getDownloadedFolderAssets } from "api/r2Upload";
 import { getUrlSearchParams } from "utils/navigation";
 
 const AdminPage = () => {
