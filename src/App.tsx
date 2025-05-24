@@ -228,9 +228,11 @@ export const App = () => {
             bottom: 0,
             left: 0,
             right: 0,
-            height: 64,
+            height: `calc(64px + env(safe-area-inset-bottom))`,
+            paddingBottom: "env(safe-area-inset-bottom)",
             bgcolor: "background.paper",
             boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
+            zIndex: 999,
           }}
         >
           <BottomNavigationAction
