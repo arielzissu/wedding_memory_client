@@ -31,7 +31,6 @@ interface IPhotoDisplayGridProps {
   isDeletable?: boolean;
 }
 
-
 const PhotoDisplayGrid = ({
   selectedIndex,
   files,
@@ -98,30 +97,26 @@ const PhotoDisplayGrid = ({
     }
   };
 
+  const playButtonSize = () => {
+    switch (zoomLevel) {
+      case 100:
+      case 150:
+        return "14px";
+      case 200:
+      case 250:
+        return "16px";
+      case 300:
+        return "18px";
+      case 350:
+        return "20px";
+      case 400:
+        return "22px";
+      default:
+        return "14px";
+    }
+  };
+
   const renderDownloadButton = (file) => (
-    // <IconButton
-    //   id="download-button"
-    //   onClick={() => downloadFile(file.url, file.fileName)}
-    //   sx={{
-    //     position: "absolute",
-    //     top: 12,
-    //     left: 12,
-    //     zIndex: 10,
-    //     bgcolor: "rgba(255,255,255,0.8)",
-    //     "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-    //   }}
-    // >
-    //   <svg
-    //     xmlns="http://www.w3.org/2000/svg"
-    //     height="24"
-    //     viewBox="0 0 24 24"
-    //     width="24"
-    //     fill="black"
-    //   >
-    //     <path d="M0 0h24v24H0z" fill="none" />
-    //     <path d="M5 20h14v-2H5v2zm7-18l-7 7h4v6h6v-6h4l-7-7z" />
-    //   </svg>
-    // </IconButton>
     <IconButton
       sx={{
         position: "absolute",
@@ -162,6 +157,7 @@ const PhotoDisplayGrid = ({
           )}
           {file.type === "video" && (
             <div
+              id="play-button"
               style={{
                 position: "absolute",
                 top: "50%",
@@ -171,13 +167,12 @@ const PhotoDisplayGrid = ({
                 color: "white",
                 padding: "4px 8px",
                 borderRadius: "4px",
-                fontSize: "14px",
+                fontSize: playButtonSize(),
               }}
             >
               ▶
             </div>
           )}
-          {renderDownloadButton(file)}
         </>
       ),
       isVideo: file.type === "video",

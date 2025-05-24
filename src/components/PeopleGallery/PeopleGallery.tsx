@@ -2,13 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Button, Typography } from "@mui/material";
 import { fetchPeople } from "api/r2Upload";
 import { IPeople, IR2File } from "types";
-import {
-  FaceCard,
-  FaceGrid,
-  MediaGrid,
-  MediaImg,
-  PeopleFaceImg,
-} from "./PeopleGallery.style";
+import { FaceCard, FaceGrid, PeopleFaceImg } from "./PeopleGallery.style";
+import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 
 interface PeopleGalleryProps {
   files: IR2File[];
@@ -17,11 +12,11 @@ interface PeopleGalleryProps {
 const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
   const [people, setPeople] = useState<IPeople[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<null | string>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const selectedPerson = people.find((p) => p.personId === selectedPersonId);
 
   const fetchPeopleData = async () => {
     const peopleRes = await fetchPeople();
-    console.log("peopleRes: ", peopleRes);
     setPeople(peopleRes);
   };
 
@@ -44,11 +39,12 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
 
   const renderMediaGrid = (mediaFiles) => {
     return (
-      <MediaGrid>
-        {mediaFiles?.map((item, i) => (
-          <MediaImg key={i} src={item.url} alt={item.caption || "Face"} />
-        ))}
-      </MediaGrid>
+      <PhotoDisplayGrid
+        selectedIndex={selectedIndex}
+        setSelectedIndex={setSelectedIndex}
+        files={mediaFiles}
+        setFiles={() => {}}
+      />
     );
   };
 
