@@ -23,12 +23,13 @@ import {
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
 import { ILocalUser, IR2File } from "types";
-import { fetchPhotos, uploadPhotos } from "api/r2Upload";
+import { fetchPhotos, getUploadStatus, uploadPhotos } from "api/r2Upload";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
 import PeopleGallery from "components/PeopleGallery/PeopleGallery";
 import UserPhotos from "components/UserPhotos/UserPhotos";
+import snackbarStore from "stores/snackbarStore";
 
 const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -57,7 +58,7 @@ export const App = () => {
     const fetchResponse = await fetchPhotos(relevantFile);
     const photosResponse = fetchResponse.photos;
     if (photosResponse?.length > 0) {
-      setFiles((prevFiles) => [...prevFiles, ...photosResponse]);
+      setFiles(photosResponse);
     }
   };
 
@@ -96,6 +97,27 @@ export const App = () => {
     }
   };
 
+  const pollUploadStatus = (uploadId) => {
+    const interval = setInterval(async () => {
+      const res = await getUploadStatus(uploadId);
+      if (res?.status === "completed") {
+        clearInterval(interval);
+        clearTimeout(timeout); // stop the timeout too
+        snackbarStore.show("Upload complete!", "success");
+        fetchImages();
+      }
+      if (res?.status === "failed") {
+        clearInterval(interval);
+        clearTimeout(timeout);
+        snackbarStore.show("Upload failed", "error");
+      }
+    }, 3000);
+
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+    }, 120000);
+  };
+
   const handleFileChange = async (event) => {
     event.preventDefault();
     if (!userEmail) {
@@ -126,13 +148,12 @@ export const App = () => {
         userEmail
       );
 
-      const uploadedFile = uploadedFileResponse.files.map(
-        (file) => file.fileName
+      snackbarStore.show(
+        "Uploading your photos... They'll appear here once ready",
+        "info",
+        null
       );
-
-      console.log("uploadedFile: ", uploadedFile);
-
-      setFiles((prevFiles) => [...prevFiles, ...uploadedFile]);
+      pollUploadStatus(uploadedFileResponse.uploadId);
     } catch (err) {
       console.error("Upload failed", err);
     } finally {

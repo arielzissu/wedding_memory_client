@@ -4,12 +4,12 @@ import { Snackbar, Alert } from "@mui/material";
 import snackbarStore from "stores/snackbarStore";
 
 const GlobalSnackbar = observer(() => {
-  const { open, message, severity, close } = snackbarStore;
+  const { open, message, severity, duration, close } = snackbarStore;
 
   return (
     <Snackbar
       open={open}
-      autoHideDuration={5000}
+      autoHideDuration={duration}
       onClose={(_, reason) => {
         if (reason === "clickaway") return;
         close();

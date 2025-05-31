@@ -1,4 +1,4 @@
-import { IPeople, IR2File } from "../../types";
+import { IPeople, IR2File, IUploadStatusResponse } from "../../types";
 import { request } from "utils/api";
 
 export const fetchPhotos = async (
@@ -37,6 +37,18 @@ export const uploadPhotos = async (
     },
     headers: {
       "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const getUploadStatus = async (
+  uploadId: string
+): Promise<IUploadStatusResponse> => {
+  return await request({
+    uri: "/r2/upload-status",
+    method: "GET",
+    params: {
+      uploadId,
     },
   });
 };

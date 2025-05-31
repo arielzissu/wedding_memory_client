@@ -23,3 +23,14 @@ export interface IPeople {
   mediaFiles: IR2File[];
   sampleThumbnail: string;
 }
+
+export interface IUploadStatusResponse {
+  uploadId: string;
+  status: string;
+  totalFiles: number;
+  processedFiles: number;
+  error: any;
+  updatedAt: Date;
+  uploaderEmail: string;
+  weddingName: string;
+}

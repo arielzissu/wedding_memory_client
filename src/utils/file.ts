@@ -1,3 +1,4 @@
+import snackbarStore from "stores/snackbarStore";
 import { isIOS } from "../constants/app";
 
 export const downloadFile = async (
@@ -29,6 +30,9 @@ export const downloadFile = async (
     }
   } catch (err) {
     console.error("Download failed:", err);
-    alert("Failed to download. The file may be protected or blocked.");
+    snackbarStore.show(
+      "Failed to download. The file may be protected or blocked.",
+      "error"
+    );
   }
 };

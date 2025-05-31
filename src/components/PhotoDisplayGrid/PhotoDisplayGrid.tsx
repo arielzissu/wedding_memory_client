@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, IconButton, Modal, Fab, Button, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Modal,
+  Fab,
+  Button,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import {
   Delete,
   Close,
@@ -43,7 +51,7 @@ const PhotoDisplayGrid = ({
   const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
     index: number;
     fileName: string;
@@ -88,12 +96,7 @@ const PhotoDisplayGrid = ({
     isPhoto: boolean
   ) => {
     e.stopPropagation();
-    // setIsOpenModal(true);
     setDeleteTarget({ index, fileName, isPhoto });
-
-    // setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
-    // const userData = getFromLocalStorage(USER_DATA_KEY);
-    // await deletePhoto(userData.email, fileName);
   };
 
   const confirmDelete = async () => {
@@ -102,7 +105,9 @@ const PhotoDisplayGrid = ({
       prevFiles.filter((_, i) => i !== deleteTarget.index)
     );
     const userData = getFromLocalStorage(USER_DATA_KEY);
+    setIsLoadingDelete(true);
     await deletePhoto(userData.email, deleteTarget.fileName);
+    setIsLoadingDelete(false);
     setDeleteTarget(null);
   };
 
@@ -347,13 +352,21 @@ const PhotoDisplayGrid = ({
         actions={
           <>
             <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-            <Button onClick={confirmDelete} variant="contained">
-              Confirm
+            <Button
+              sx={{ minWidth: 162 }}
+              onClick={confirmDelete}
+              variant="contained"
+            >
+              {isLoadingDelete ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Delete Confirm"
+              )}
             </Button>
           </>
         }
       >
-        <Typography>{`Do you really want to delete the ${
+        <Typography>{`Do you want to delete the ${
           deleteTarget?.isPhoto ? "photo" : "video"
         }`}</Typography>
       </GenericModal>
