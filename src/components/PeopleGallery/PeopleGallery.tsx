@@ -48,6 +48,10 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
     );
   };
 
+  if (!people.length) {
+    return <Typography variant="h6">No people found.</Typography>;
+  }
+
   return (
     <div>
       {!selectedPersonId ? (
