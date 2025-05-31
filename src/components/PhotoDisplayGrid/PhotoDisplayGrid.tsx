@@ -125,7 +125,7 @@ const PhotoDisplayGrid = ({
         bgcolor: "rgba(255,255,255,0.7)",
         pointerEvents: "auto",
       }}
-      onClick={() => downloadFile(file.url, file.fileName)}
+      onClick={() => downloadFile(file.url, file.fileName, (msg) => alert(msg))}
     >
       <Download />
     </IconButton>

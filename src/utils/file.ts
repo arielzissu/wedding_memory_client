@@ -1,22 +1,22 @@
-// import canvas from "canvas";
 import { isIOS } from "../constants/app";
 
-export const downloadFile = async (imageUrl: string, fileName: string) => {
-  console.log("imageUrl: ", imageUrl);
-  console.log("fileName: ", fileName);
-
+export const downloadFile = async (
+  imageUrl: string,
+  fileName: string,
+  notify?: (message: string) => void
+) => {
   try {
     if (isIOS) {
-      // iOS Safari doesn't support blob downloads reliably
-      const link = document.createElement("a");
-      link.href = imageUrl;
-      link.target = "_blank"; // opens in new tab for long-press saving
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      notify?.("Tap and hold the image to save it to your device.");
+
+      // Open in a new tab for long-press saving
+      const newTab = window.open(imageUrl, "_blank", "noopener,noreferrer");
+      if (!newTab) {
+        alert("Please allow pop-ups to download the photo.");
+      }
     } else {
-      // Android, desktop — use blob to force download
+      // Android / Desktop
+      notify?.("Downloading...");
       const response = await fetch(imageUrl, { mode: "cors" });
       if (!response.ok) throw new Error("File fetch failed");
 
@@ -30,6 +30,7 @@ export const downloadFile = async (imageUrl: string, fileName: string) => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+      notify?.("Download complete!");
     }
   } catch (err) {
     console.error("Download failed:", err);

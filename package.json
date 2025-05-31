@@ -14,7 +14,6 @@
     "@mui/styled-engine-sc": "^6.1.10",
     "@react-oauth/google": "^0.12.1",
     "axios": "^1.7.8",
-    "canvas": "^2.11.2",
     "cra-template-typescript": "1.2.0",
     "jwt-decode": "^4.0.0",
     "mobx": "^6.13.7",
