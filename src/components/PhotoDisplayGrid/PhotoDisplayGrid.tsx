@@ -38,7 +38,7 @@ const PhotoDisplayGrid = ({
   setFiles,
   isDeletable = false,
 }: IPhotoDisplayGridProps) => {
-  const [zoomLevel, setZoomLevel] = useState(150);
+  const [zoomLevel, setZoomLevel] = useState(100);
   const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

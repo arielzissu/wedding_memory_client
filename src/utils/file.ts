@@ -7,13 +7,8 @@ export const downloadFile = async (
 ) => {
   try {
     if (isIOS) {
-      notify?.("Tap and hold the image to save it to your device.");
-
-      // Open in a new tab for long-press saving
-      const newTab = window.open(imageUrl, "_blank", "noopener,noreferrer");
-      if (!newTab) {
-        alert("Please allow pop-ups to download the photo.");
-      }
+      notify?.("Please tap and hold the image to save it to your device.");
+      window.open(imageUrl, "_blank", "noopener,noreferrer");
     } else {
       // Android / Desktop
       notify?.("Downloading...");
