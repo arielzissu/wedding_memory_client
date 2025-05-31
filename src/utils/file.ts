@@ -38,18 +38,15 @@ export const downloadFile = async (imageUrl: string, fileName: string) => {
     //   a.click();
     // };
     ///////////////////
-    const response = await fetch(imageUrl);
-    console.log('response: ', response);
-    const blob = await response.blob();
+    const anchor = document.createElement("a");
+    anchor.href = imageUrl;
+    anchor.download = fileName;
+    anchor.target = "_blank"; // important for iPhone Safari
+    anchor.rel = "noopener noreferrer";
 
-    const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName || "photo.jpg";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl); // cleanup
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   } catch (err) {
     console.error("Download failed:", err);
     alert("Failed to download. The file may be protected or blocked.");
