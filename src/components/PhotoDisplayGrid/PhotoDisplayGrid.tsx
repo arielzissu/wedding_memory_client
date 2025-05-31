@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, IconButton, Modal, Fab } from "@mui/material";
+import { Box, IconButton, Modal, Fab, Button, Typography } from "@mui/material";
 import {
   Delete,
   Close,
@@ -20,6 +20,7 @@ import { deletePhoto } from "api/r2Upload";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
 import { downloadFile } from "utils/file";
+import GenericModal from "components/Modal/Modal";
 
 const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 
@@ -42,8 +43,12 @@ const PhotoDisplayGrid = ({
   const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  console.log("[PhotoDisplayGrid] - files!!!!!!!: ", files);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    index: number;
+    fileName: string;
+    isPhoto: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -79,12 +84,26 @@ const PhotoDisplayGrid = ({
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
-    fileName: string
+    fileName: string,
+    isPhoto: boolean
   ) => {
     e.stopPropagation();
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    // setIsOpenModal(true);
+    setDeleteTarget({ index, fileName, isPhoto });
+
+    // setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    // const userData = getFromLocalStorage(USER_DATA_KEY);
+    // await deletePhoto(userData.email, fileName);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setFiles((prevFiles) =>
+      prevFiles.filter((_, i) => i !== deleteTarget.index)
+    );
     const userData = getFromLocalStorage(USER_DATA_KEY);
-    await deletePhoto(userData.email, fileName);
+    await deletePhoto(userData.email, deleteTarget.fileName);
+    setDeleteTarget(null);
   };
 
   const onClickCard = (index: number) => {
@@ -132,9 +151,10 @@ const PhotoDisplayGrid = ({
   );
 
   const photos = files.map((file, index) => {
+    const isPhoto = file.type === "photo";
     return {
-      src: file.type === "photo" ? file.url : file.metadata.thumbnail_url,
-      thumbnail: file.type === "photo" ? file.url : file.metadata.thumbnail_url,
+      src: isPhoto ? file.url : file.metadata.thumbnail_url,
+      thumbnail: isPhoto ? file.url : file.metadata.thumbnail_url,
       thumbnailWidth: zoomLevel,
       thumbnailHeight: zoomLevel,
       width: zoomLevel,
@@ -150,7 +170,7 @@ const PhotoDisplayGrid = ({
                 bgcolor: "rgba(255,255,255,0.7)",
                 pointerEvents: "auto",
               }}
-              onClick={(e) => handleDelete(e, index, file.fileName)}
+              onClick={(e) => handleDelete(e, index, file.fileName, isPhoto)}
             >
               <Delete />
             </IconButton>
@@ -320,6 +340,23 @@ const PhotoDisplayGrid = ({
           </SwiperWrapper>
         </Box>
       </Modal>
+      <GenericModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Are you sure?"
+        actions={
+          <>
+            <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button onClick={confirmDelete} variant="contained">
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <Typography>{`Do you really want to delete the ${
+          deleteTarget?.isPhoto ? "photo" : "video"
+        }`}</Typography>
+      </GenericModal>
     </ImageListWrapper>
   );
 };
