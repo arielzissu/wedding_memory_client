@@ -15,10 +15,17 @@ export const fetchPhotos = async (
   });
 };
 
-export const fetchPeople = async (): Promise<IPeople[]> => {
+export const fetchPeople = async (
+  userEmail,
+  relevantFile
+): Promise<IPeople[]> => {
   return await request({
     uri: `/r2/people`,
     method: "GET",
+    params: {
+      uploadCreator: userEmail,
+      weddingName: relevantFile,
+    },
   });
 };
 

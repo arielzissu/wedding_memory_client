@@ -7,16 +7,22 @@ import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 
 interface PeopleGalleryProps {
   files: IR2File[];
+  userEmail: string | undefined;
+  relevantFile: string;
 }
 
-const PeopleGallery: React.FC<PeopleGalleryProps> = ({ files }) => {
+const PeopleGallery: React.FC<PeopleGalleryProps> = ({
+  files,
+  userEmail,
+  relevantFile,
+}) => {
   const [people, setPeople] = useState<IPeople[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<null | string>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const selectedPerson = people.find((p) => p.personId === selectedPersonId);
 
   const fetchPeopleData = async () => {
-    const peopleRes = await fetchPeople();
+    const peopleRes = await fetchPeople(userEmail, relevantFile);
     setPeople(peopleRes);
   };
 

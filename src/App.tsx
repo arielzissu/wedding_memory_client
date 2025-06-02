@@ -45,7 +45,7 @@ export const App = () => {
   const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
   const [isFiveSecondsPassed, setIsFiveSecondsPassed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const relevantFile = getUrlSearchParams("f");
+  const relevantFile: string = getUrlSearchParams("f");
 
   const getUserEmail = () => {
     const localStorageEmail = getFromLocalStorage(USER_DATA_KEY);
@@ -195,7 +195,7 @@ export const App = () => {
             />
           )}
           {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-          {value === 2 && <PeopleGallery files={files} />}
+          {value === 2 && <PeopleGallery  userEmail={userEmail} relevantFile={relevantFile} files={files} />}
           {/* {value === 3 && isAdminUser && <AdminPage />} */}
         </Box>
 
