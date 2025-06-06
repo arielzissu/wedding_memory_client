@@ -57,6 +57,8 @@ const PhotoDisplayGrid = ({
     isPhoto: boolean;
   } | null>(null);
 
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > SHOW_SCROLL_BUTTON_FROM_Y_PIXEL) {
@@ -132,7 +134,13 @@ const PhotoDisplayGrid = ({
         bgcolor: "rgba(255,255,255,0.7)",
         pointerEvents: "auto",
       }}
-      onClick={() => downloadFile(file.url, file.fileName, (msg) => alert(msg))}
+      onClick={() =>
+        downloadFile(
+          file.url,
+          file.fileName,
+          (url) => setPreviewImage(url)
+        )
+      }
     >
       <Download />
     </IconButton>
@@ -336,6 +344,38 @@ const PhotoDisplayGrid = ({
           </SwiperWrapper>
         </Box>
       </Modal>
+
+      <Modal open={!!previewImage} onClose={() => setPreviewImage(null)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 2,
+            borderRadius: 2,
+            maxWidth: "90vw",
+            maxHeight: "90vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography sx={{ mb: 1 }}>Tap and hold to save</Typography>
+          <img
+            src={previewImage || ""}
+            alt="Preview"
+            style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 8 }}
+          />
+          <Button sx={{ mt: 2 }} onClick={() => setPreviewImage(null)}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
+
       <GenericModal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
