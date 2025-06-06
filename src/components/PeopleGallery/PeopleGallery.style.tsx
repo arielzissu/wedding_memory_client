@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export const PeopleFaceImg = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   border-radius: 20%;
 `;
@@ -10,6 +10,7 @@ export const PeopleFaceImg = styled.img`
 export const FaceGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
 `;
 

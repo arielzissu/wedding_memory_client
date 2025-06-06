@@ -1,7 +1,5 @@
 import React, { SyntheticEvent, useEffect, useRef, useState } from "react";
-// import UserPhotos from "./components/UserPhotos/UserPhotos";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
-// import AdminPage from "components/AdminPage/AdminPage";
 import {
   getFromLocalStorage,
   removeFromLocalStorage,
@@ -22,7 +20,7 @@ import {
   People as PeopleIcon,
 } from "@mui/icons-material";
 import Header from "components/Header/Header";
-import { ILocalUser, IR2File } from "types";
+import { ILocalUser, IR2File, TabsOptions } from "types";
 import { fetchPhotos, getUploadStatus, uploadPhotos } from "api/r2Upload";
 import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
@@ -30,14 +28,22 @@ import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
 import PeopleGallery from "components/PeopleGallery/PeopleGallery";
 import UserPhotos from "components/UserPhotos/UserPhotos";
 import snackbarStore from "stores/snackbarStore";
+import { getPollUploadsStatusIntervalTime } from "utils/file";
+import {
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { PATH_TO_TAB, TAB_TO_PATH } from "constants/app";
 
-const MAX_SIZE_IN_BYTES = 0.5 * 1024 * 1024 * 1024; // = 0.5 GB
+const MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
 
 export const App = () => {
   const [files, setFiles] = useState<IR2File[]>([]);
   const [loggedUserFiles, setLoggedUserFiles] = useState<IR2File[]>([]);
-  const [value, setValue] = useState<number>(0);
   const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
   const [user, setUser] = useState<ILocalUser>();
   const [userEmail, setUserEmail] = useState<string>();
@@ -47,10 +53,23 @@ export const App = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const relevantFile: string = getUrlSearchParams("f");
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const initialTab = Object.values(TabsOptions).includes(
+    PATH_TO_TAB[location.pathname] as TabsOptions
+  )
+    ? (PATH_TO_TAB[location.pathname] as TabsOptions)
+    : TabsOptions.GALLERY;
+
+  const [currentTab, setCurrentTab] = useState<TabsOptions>(initialTab);
+
   const getUserEmail = () => {
-    const localStorageEmail = getFromLocalStorage(USER_DATA_KEY);
-    if (localStorageEmail) {
-      setUserEmail(localStorageEmail.email);
+    const storedUser = getFromLocalStorage(USER_DATA_KEY);
+    setUser(storedUser);
+    if (storedUser?.email) {
+      setUserEmail(storedUser.email);
+      setIsAdminUser(storedUser.email === "arielzissu98@gmail.com");
     }
   };
 
@@ -69,22 +88,18 @@ export const App = () => {
 
   useEffect(() => {
     if (!userEmail) return;
-    const userFiles = files.filter(
-      (file) => file.metadata.uploader === userEmail
-    );
-    setLoggedUserFiles(userFiles);
+    setLoggedUserFiles(files.filter((f) => f.metadata.uploader === userEmail));
   }, [files, userEmail]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsFiveSecondsPassed(true);
-    }, 5000);
-
+    const timer = setTimeout(() => setIsFiveSecondsPassed(true), 5000);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleChange = (_e: SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleChange = (_e: SyntheticEvent, newValue: TabsOptions) => {
+    setCurrentTab(newValue);
+    const search = location.search;
+    navigate(`${TAB_TO_PATH[newValue]}${search}`);
   };
 
   const onClickFileInput = () => {
@@ -97,12 +112,14 @@ export const App = () => {
     }
   };
 
-  const pollUploadStatus = (uploadId) => {
+  const pollUploadStatus = (uploadId: string, totalSize: number) => {
+    const intervalTime = getPollUploadsStatusIntervalTime(totalSize);
+
     const interval = setInterval(async () => {
       const res = await getUploadStatus(uploadId);
       if (res?.status === "completed") {
         clearInterval(interval);
-        clearTimeout(timeout); // stop the timeout too
+        clearTimeout(timeout);
         snackbarStore.show("Upload complete!", "success");
         fetchImages();
       }
@@ -111,7 +128,7 @@ export const App = () => {
         clearTimeout(timeout);
         snackbarStore.show("Upload failed", "error");
       }
-    }, 3000);
+    }, intervalTime);
 
     const timeout = setTimeout(() => {
       clearInterval(interval);
@@ -120,6 +137,7 @@ export const App = () => {
 
   const handleFileChange = async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     if (!userEmail) {
       setIsOpenLoginModal(true);
       return;
@@ -153,20 +171,13 @@ export const App = () => {
         "info",
         null
       );
-      pollUploadStatus(uploadedFileResponse.uploadId);
+      pollUploadStatus(uploadedFileResponse.uploadId, totalSize);
     } catch (err) {
       console.error("Upload failed", err);
     } finally {
       setIsLoadingUpload(false);
     }
   };
-
-  useEffect(() => {
-    const localUser = getFromLocalStorage(USER_DATA_KEY);
-    setUser(localUser);
-    const isAdmin = localUser && localUser.email === "arielzissu98@gmail.com";
-    setIsAdminUser(isAdmin);
-  }, []);
 
   const handleSignOut = () => {
     removeFromLocalStorage(USER_DATA_KEY);
@@ -186,18 +197,6 @@ export const App = () => {
     <>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
-
-        <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7 }}>
-          {value === 0 && (
-            <UserPhotos
-              loggedUserFiles={loggedUserFiles}
-              setLoggedUserFiles={setLoggedUserFiles}
-            />
-          )}
-          {value === 1 && <ImageGallery files={files} setFiles={setFiles} />}
-          {value === 2 && <PeopleGallery  userEmail={userEmail} relevantFile={relevantFile} files={files} />}
-          {/* {value === 3 && isAdminUser && <AdminPage />} */}
-        </Box>
 
         <Fab
           color="primary"
@@ -242,7 +241,7 @@ export const App = () => {
         />
 
         <BottomNavigation
-          value={value}
+          value={currentTab}
           onChange={handleChange}
           sx={{
             position: "fixed",
@@ -257,32 +256,95 @@ export const App = () => {
           }}
         >
           <BottomNavigationAction
+            value={TabsOptions.MY_PHOTO}
             label="My Photos"
             showLabel
             icon={<PhotoCamera />}
-            sx={{ color: value === 0 ? "primary.main" : "text.secondary" }}
+            sx={{
+              color:
+                currentTab === TabsOptions.MY_PHOTO
+                  ? "primary.main"
+                  : "text.secondary",
+            }}
           />
           <BottomNavigationAction
+            value={TabsOptions.GALLERY}
             label="Gallery"
             showLabel
             icon={<Image />}
-            sx={{ color: value === 1 ? "primary.main" : "text.secondary" }}
+            sx={{
+              color:
+                currentTab === TabsOptions.GALLERY
+                  ? "primary.main"
+                  : "text.secondary",
+            }}
           />
           <BottomNavigationAction
+            value={TabsOptions.PEOPLE}
             label="People"
             showLabel
             icon={<PeopleIcon />}
-            sx={{ color: value === 2 ? "primary.main" : "text.secondary" }}
+            sx={{
+              color:
+                currentTab === TabsOptions.PEOPLE
+                  ? "primary.main"
+                  : "text.secondary",
+            }}
           />
           {isAdminUser && (
             <BottomNavigationAction
+              value={TabsOptions.ADMIN}
               label="Admin"
               showLabel
               icon={<AdminPanelSettings />}
-              sx={{ color: value === 3 ? "primary.main" : "text.secondary" }}
+              sx={{
+                color:
+                  currentTab === TabsOptions.ADMIN
+                    ? "primary.main"
+                    : "text.secondary",
+              }}
             />
           )}
         </BottomNavigation>
+
+        <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7, mb: 8 }}>
+          <Routes>
+            <Route
+              path={TAB_TO_PATH.my_photo}
+              element={
+                <UserPhotos
+                  loggedUserFiles={loggedUserFiles}
+                  setLoggedUserFiles={setLoggedUserFiles}
+                />
+              }
+            />
+            <Route
+              path={TAB_TO_PATH.gallery}
+              element={<ImageGallery files={files} setFiles={setFiles} />}
+            />
+            <Route
+              path={TAB_TO_PATH.people}
+              element={
+                <PeopleGallery
+                  userEmail={userEmail}
+                  relevantFile={relevantFile}
+                  files={files}
+                />
+              }
+            />
+            {/* {isAdminUser && <Route path={TAB_TO_PATH.admin} element={<AdminPage />} />}  */}
+
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to={TAB_TO_PATH.gallery + "/" + location.search}
+                  replace
+                />
+              }
+            />
+          </Routes>
+        </Box>
 
         {isOpenLoginModal && (
           <LoginModal

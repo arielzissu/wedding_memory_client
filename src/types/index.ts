@@ -34,3 +34,11 @@ export interface IUploadStatusResponse {
   uploaderEmail: string;
   weddingName: string;
 }
+
+
+export enum TabsOptions {
+  MY_PHOTO = "my_photo",
+  GALLERY = "gallery",
+  PEOPLE = "people",
+  ADMIN = "admin",
+}

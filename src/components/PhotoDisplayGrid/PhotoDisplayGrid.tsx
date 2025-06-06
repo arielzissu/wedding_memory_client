@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Box,
   IconButton,
@@ -48,7 +48,6 @@ const PhotoDisplayGrid = ({
   isDeletable = false,
 }: IPhotoDisplayGridProps) => {
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [columns, setColumns] = useState(3);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
@@ -57,22 +56,6 @@ const PhotoDisplayGrid = ({
     fileName: string;
     isPhoto: boolean;
   } | null>(null);
-
-  useEffect(() => {
-    const updateColumns = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const newColumns = Math.max(1, Math.floor(containerWidth / zoomLevel));
-        setColumns(newColumns);
-      }
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => {
-      window.removeEventListener("resize", updateColumns);
-    };
-  }, [zoomLevel]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,8 +99,8 @@ const PhotoDisplayGrid = ({
   };
 
   const scrollToFirstImage = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollIntoView({ behavior: "smooth" });
+    if (window) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -155,55 +138,62 @@ const PhotoDisplayGrid = ({
     </IconButton>
   );
 
-  const photos = files.map((file, index) => {
-    const isPhoto = file.type === "photo";
-    return {
-      src: isPhoto ? file.url : file.metadata.thumbnail_url,
-      thumbnail: isPhoto ? file.url : file.metadata.thumbnail_url,
-      thumbnailWidth: zoomLevel,
-      thumbnailHeight: zoomLevel,
-      width: zoomLevel,
-      height: zoomLevel,
-      customOverlay: (
-        <>
-          {isDeletable && (
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 5,
-                right: 5,
-                bgcolor: "rgba(255,255,255,0.7)",
-                pointerEvents: "auto",
-              }}
-              onClick={(e) => handleDelete(e, index, file.fileName, isPhoto)}
-            >
-              <Delete />
-            </IconButton>
-          )}
-          {file.type === "video" && (
-            <div
-              id="play-button"
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                background: "rgba(0,0,0,0.5)",
-                color: "white",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                fontSize: playButtonSize(),
-              }}
-            >
-              ▶
-            </div>
-          )}
-        </>
-      ),
-      isVideo: file.type === "video",
-      videoSrc: file.url,
-    };
-  });
+  const photos = files.map(
+    useMemo(
+      () => (file, index) => {
+        const isPhoto = file.type === "photo";
+        return {
+          src: isPhoto ? file.url : file.metadata.thumbnail_url,
+          thumbnail: isPhoto ? file.url : file.metadata.thumbnail_url,
+          thumbnailWidth: zoomLevel,
+          thumbnailHeight: zoomLevel,
+          width: zoomLevel,
+          height: zoomLevel,
+          customOverlay: (
+            <>
+              {isDeletable && (
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: 5,
+                    right: 5,
+                    bgcolor: "rgba(255,255,255,0.7)",
+                    pointerEvents: "auto",
+                  }}
+                  onClick={(e) =>
+                    handleDelete(e, index, file.fileName, isPhoto)
+                  }
+                >
+                  <Delete />
+                </IconButton>
+              )}
+              {file.type === "video" && (
+                <div
+                  id="play-button"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    background: "rgba(0,0,0,0.5)",
+                    color: "white",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: playButtonSize(),
+                  }}
+                >
+                  ▶
+                </div>
+              )}
+            </>
+          ),
+          isVideo: file.type === "video",
+          videoSrc: file.url,
+        };
+      },
+      [files, zoomLevel]
+    )
+  );
 
   return (
     <ImageListWrapper ref={containerRef}>
@@ -317,6 +307,7 @@ const PhotoDisplayGrid = ({
                         key={`photo-${file.fileName}-${index}`}
                         src={file.url}
                         alt="Photo"
+                        loading="lazy"
                         style={{
                           width: "100%",
                           height: "auto",
@@ -374,4 +365,4 @@ const PhotoDisplayGrid = ({
   );
 };
 
-export default PhotoDisplayGrid;
+export default React.memo(PhotoDisplayGrid);

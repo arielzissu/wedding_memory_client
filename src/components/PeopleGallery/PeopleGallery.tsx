@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { fetchPeople } from "api/r2Upload";
 import { IPeople, IR2File } from "types";
 import { FaceCard, FaceGrid, PeopleFaceImg } from "./PeopleGallery.style";
@@ -17,12 +17,15 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({
   relevantFile,
 }) => {
   const [people, setPeople] = useState<IPeople[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedPersonId, setSelectedPersonId] = useState<null | string>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const selectedPerson = people.find((p) => p.personId === selectedPersonId);
 
   const fetchPeopleData = async () => {
+    setIsLoading(true);
     const peopleRes = await fetchPeople(userEmail, relevantFile);
+    setIsLoading(false);
     setPeople(peopleRes);
   };
 
@@ -38,7 +41,9 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({
         onClick={() => setSelectedPersonId(person.personId)}
       >
         <PeopleFaceImg src={person.sampleThumbnail} alt="Face" />
-        <Typography variant="body2">{person.faceCount} faces</Typography>
+        <Typography variant="body2">
+          {person.faceCount} Photo{person.faceCount > 1 ? "s" : ""}
+        </Typography>
       </FaceCard>
     );
   };
@@ -53,6 +58,21 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({
       />
     );
   };
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          height: "65vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   if (!people.length) {
     return <Typography variant="h6">No people found.</Typography>;
