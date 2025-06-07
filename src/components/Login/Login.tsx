@@ -14,6 +14,7 @@ interface GoogleLoginModalProps {
 }
 
 const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
+
   const handleLoginSuccess = (credentialResponse) => {
     try {
       const decodedToken: ILocalUser & JwtPayload = jwtDecode(
@@ -24,7 +25,6 @@ const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
         name: decodedToken.name,
         picture: decodedToken.picture,
       });
-      window.location.reload();
     } catch (error) {
       console.error("Error decoding token:", error);
     } finally {

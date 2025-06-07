@@ -17,6 +17,7 @@ import {
   Download,
 } from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -31,6 +32,7 @@ import { downloadFile } from "utils/file";
 import GenericModal from "components/Modal/Modal";
 
 const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
+const BATCH_SIZE = 15;
 
 interface IPhotoDisplayGridProps {
   selectedIndex: number | null;
@@ -49,6 +51,7 @@ const PhotoDisplayGrid = ({
 }: IPhotoDisplayGridProps) => {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(BATCH_SIZE);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -58,6 +61,7 @@ const PhotoDisplayGrid = ({
   } | null>(null);
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,6 +77,33 @@ const PhotoDisplayGrid = ({
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    const currentBatch = files.slice(
+      displayedCount - BATCH_SIZE,
+      displayedCount
+    );
+    const imagePromises = currentBatch
+      .filter((f) => f.type === "photo")
+      .map((file) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = file.url;
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+
+    Promise.all(imagePromises).then(() => {
+      const pageHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      const userHasNotScrolled = window.scrollY === 0;
+
+      if (pageHeight <= viewportHeight || userHasNotScrolled) {
+        loadMore();
+      }
+    });
+  }, [displayedCount, files]);
 
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -101,9 +132,7 @@ const PhotoDisplayGrid = ({
   };
 
   const scrollToFirstImage = () => {
-    if (window) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const playButtonSize = () => {
@@ -135,73 +164,75 @@ const PhotoDisplayGrid = ({
         pointerEvents: "auto",
       }}
       onClick={() =>
-        downloadFile(
-          file.url,
-          file.fileName,
-          (url) => setPreviewImage(url)
-        )
+        downloadFile(file.url, file.fileName, (url) => setPreviewImage(url))
       }
     >
       <Download />
     </IconButton>
   );
 
-  const photos = files.map(
-    useMemo(
-      () => (file, index) => {
-        const isPhoto = file.type === "photo";
-        return {
-          src: isPhoto ? file.url : file.metadata.thumbnail_url,
-          thumbnail: isPhoto ? file.url : file.metadata.thumbnail_url,
-          thumbnailWidth: zoomLevel,
-          thumbnailHeight: zoomLevel,
-          width: zoomLevel,
-          height: zoomLevel,
-          customOverlay: (
-            <>
-              {isDeletable && (
-                <IconButton
-                  sx={{
-                    position: "absolute",
-                    top: 5,
-                    right: 5,
-                    bgcolor: "rgba(255,255,255,0.7)",
-                    pointerEvents: "auto",
-                  }}
-                  onClick={(e) =>
-                    handleDelete(e, index, file.fileName, isPhoto)
-                  }
-                >
-                  <Delete />
-                </IconButton>
-              )}
-              {file.type === "video" && (
-                <div
-                  id="play-button"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    background: "rgba(0,0,0,0.5)",
-                    color: "white",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: playButtonSize(),
-                  }}
-                >
-                  ▶
-                </div>
-              )}
-            </>
-          ),
-          isVideo: file.type === "video",
-          videoSrc: file.url,
-        };
-      },
-      [files, zoomLevel]
-    )
+  const loadMore = () => {
+    if (displayedCount >= files.length) {
+      setHasMore(false);
+      return;
+    }
+    setDisplayedCount((prev) => Math.min(prev + BATCH_SIZE, files.length));
+  };
+
+  const displayedFiles = useMemo(
+    () => files.slice(0, displayedCount),
+    [files, displayedCount] // zoomLevel ??
   );
+
+  const photos = displayedFiles.map((file, index) => {
+    const isPhoto = file.type === "photo";
+    return {
+      src: isPhoto ? file.url : file.metadata.thumbnail_url,
+      thumbnail: isPhoto ? file.url : file.metadata.thumbnail_url,
+      thumbnailWidth: zoomLevel,
+      thumbnailHeight: zoomLevel,
+      width: zoomLevel,
+      height: zoomLevel,
+      customOverlay: (
+        <>
+          {isDeletable && (
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                bgcolor: "rgba(255,255,255,0.7)",
+                pointerEvents: "auto",
+              }}
+              onClick={(e) => handleDelete(e, index, file.fileName, isPhoto)}
+            >
+              <Delete />
+            </IconButton>
+          )}
+          {file.type === "video" && (
+            <div
+              id="play-button"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                background: "rgba(0,0,0,0.5)",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                fontSize: playButtonSize(),
+              }}
+            >
+              ▶
+            </div>
+          )}
+        </>
+      ),
+      isVideo: file.type === "video",
+      videoSrc: file.url,
+    };
+  });
 
   return (
     <ImageListWrapper ref={containerRef}>
@@ -226,13 +257,21 @@ const PhotoDisplayGrid = ({
         </IconButton>
       </Box>
 
-      <Gallery
-        images={photos}
-        enableImageSelection={false}
-        margin={5}
-        rowHeight={zoomLevel}
-        onClick={(index) => onClickCard(index)}
-      />
+      <InfiniteScroll
+        dataLength={displayedFiles.length}
+        next={loadMore}
+        hasMore={hasMore}
+        loader={<h4>Loading more photos...</h4>}
+        style={{ overflow: "visible" }}
+      >
+        <Gallery
+          images={photos}
+          enableImageSelection={false}
+          margin={5}
+          rowHeight={zoomLevel}
+          onClick={(index) => onClickCard(index)}
+        />
+      </InfiniteScroll>
 
       <Fab
         color="default"
@@ -380,6 +419,9 @@ const PhotoDisplayGrid = ({
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="Are you sure?"
+        description={`Do you want to delete the ${
+          deleteTarget?.isPhoto ? "photo" : "video"
+        }`}
         actions={
           <>
             <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
@@ -396,11 +438,7 @@ const PhotoDisplayGrid = ({
             </Button>
           </>
         }
-      >
-        <Typography>{`Do you want to delete the ${
-          deleteTarget?.isPhoto ? "photo" : "video"
-        }`}</Typography>
-      </GenericModal>
+      ></GenericModal>
     </ImageListWrapper>
   );
 };

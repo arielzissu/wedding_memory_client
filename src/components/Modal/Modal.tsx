@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -12,7 +13,7 @@ interface GenericModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
-  children: React.ReactNode;
+  description?: string;
   actions?: React.ReactNode;
   showCloseIcon?: boolean;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
@@ -22,8 +23,8 @@ interface GenericModalProps {
 const GenericModal: React.FC<GenericModalProps> = ({
   open,
   onClose,
-  title,
-  children,
+  title = "",
+  description = "",
   actions,
   showCloseIcon = true,
   maxWidth = "sm",
@@ -43,7 +44,7 @@ const GenericModal: React.FC<GenericModalProps> = ({
           alignItems: "center",
         }}
       >
-        {title || ""}
+        {title}
         {showCloseIcon && (
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
@@ -51,7 +52,9 @@ const GenericModal: React.FC<GenericModalProps> = ({
         )}
       </DialogTitle>
 
-      <DialogContent dividers>{children}</DialogContent>
+      <DialogContent dividers>
+        <Typography>{description}</Typography>
+      </DialogContent>
 
       {actions && <DialogActions>{actions}</DialogActions>}
     </Dialog>

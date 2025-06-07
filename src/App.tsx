@@ -11,6 +11,7 @@ import {
   BottomNavigationAction,
   Fab,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import {
   CloudUpload,
@@ -37,6 +38,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { PATH_TO_TAB, TAB_TO_PATH } from "constants/app";
+import GenericModal from "components/Modal/Modal";
 
 const MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -49,6 +51,7 @@ export const App = () => {
   const [userEmail, setUserEmail] = useState<string>();
   const [isLoadingUpload, setIsLoadingUpload] = useState<boolean>(false);
   const [isOpenLoginModal, setIsOpenLoginModal] = useState<boolean>(false);
+  const [isOpenUploadModal, setIsOpenUploadModal] = useState<boolean>(false);
   const [isFiveSecondsPassed, setIsFiveSecondsPassed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const relevantFile: string = getUrlSearchParams("f");
@@ -160,6 +163,8 @@ export const App = () => {
     try {
       setIsLoadingUpload(true);
 
+      snackbarStore.show("Preparing your photos for upload...");
+
       const uploadedFileResponse = await uploadPhotos(
         formData,
         relevantFile,
@@ -167,9 +172,7 @@ export const App = () => {
       );
 
       snackbarStore.show(
-        "Uploading your photos... They'll appear here once ready",
-        "info",
-        null
+        "Uploading your photos... They'll appear here once ready"
       );
       pollUploadStatus(uploadedFileResponse.uploadId, totalSize);
     } catch (err) {
@@ -345,15 +348,39 @@ export const App = () => {
             />
           </Routes>
         </Box>
-
-        {isOpenLoginModal && (
-          <LoginModal
-            isOpen={isOpenLoginModal}
-            onClose={() => setIsOpenLoginModal(false)}
-          />
-        )}
       </Box>
       <GlobalSnackbar />
+      {isOpenLoginModal && (
+        <LoginModal
+          isOpen={isOpenLoginModal}
+          onClose={() => {
+            setIsOpenLoginModal(false);
+            getUserEmail();
+            setIsOpenUploadModal(true);
+          }}
+        />
+      )}
+
+      <GenericModal
+        open={isOpenUploadModal}
+        onClose={() => setIsOpenUploadModal(false)}
+        title="upload photos"
+        description={`You can upload photos up to ${MAX_SIZE_IN_GB} GB. Please select the files you want to upload.`}
+        actions={
+          <>
+            <Button
+              sx={{ minWidth: 162 }}
+              onClick={() => {
+                onClickFileInput();
+                setIsOpenUploadModal(false);
+              }}
+              variant="contained"
+            >
+              Upload Photos
+            </Button>
+          </>
+        }
+      ></GenericModal>
     </>
   );
 };
