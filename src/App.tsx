@@ -163,7 +163,7 @@ export const App = () => {
     try {
       setIsLoadingUpload(true);
 
-      snackbarStore.show("Preparing your photos for upload...");
+      snackbarStore.show("Preparing your photos for upload...", "info", null);
 
       const uploadedFileResponse = await uploadPhotos(
         formData,
@@ -172,7 +172,9 @@ export const App = () => {
       );
 
       snackbarStore.show(
-        "Uploading your photos... They'll appear here once ready"
+        "Uploading your photos... They'll appear here once ready",
+        "info",
+        null
       );
       pollUploadStatus(uploadedFileResponse.uploadId, totalSize);
     } catch (err) {
