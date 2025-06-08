@@ -5,7 +5,6 @@ import {
   Modal,
   Fab,
   Button,
-  Typography,
   CircularProgress,
 } from "@mui/material";
 import {
@@ -28,8 +27,8 @@ import { IR2File } from "types";
 import { deletePhoto } from "api/r2Upload";
 import { getFromLocalStorage } from "utils/localStorage";
 import { USER_DATA_KEY } from "components/Login/Login";
-import { downloadFile } from "utils/file";
 import GenericModal from "components/Modal/Modal";
+import { isIOS } from "constants/app";
 
 const SHOW_SCROLL_BUTTON_FROM_Y_PIXEL = 330;
 const BATCH_SIZE = 15;
@@ -49,18 +48,20 @@ const PhotoDisplayGrid = ({
   setFiles,
   isDeletable = false,
 }: IPhotoDisplayGridProps) => {
-  const [zoomLevel, setZoomLevel] = useState(100);
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [displayedCount, setDisplayedCount] = useState(BATCH_SIZE);
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
+  const [displayedCount, setDisplayedCount] = useState<number>(BATCH_SIZE);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
+  const [isOpenDownloadModal, setIsOpenDownloadModal] =
+    useState<boolean>(false);
+  const [downloadImageUrl, setDownloadImageUrl] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     index: number;
     fileName: string;
     isPhoto: boolean;
   } | null>(null);
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
@@ -154,22 +155,41 @@ const PhotoDisplayGrid = ({
     }
   };
 
-  const renderDownloadButton = (file) => (
-    <IconButton
-      sx={{
-        position: "absolute",
-        top: 5,
-        left: 5,
-        bgcolor: "rgba(255,255,255,0.7)",
-        pointerEvents: "auto",
-      }}
-      onClick={() =>
-        downloadFile(file.url, file.fileName, (url) => setPreviewImage(url))
-      }
-    >
-      <Download />
-    </IconButton>
-  );
+  const downloadImage = async (imageUrl, fileName) => {
+    if (isIOS) {
+      setIsOpenDownloadModal(true);
+      setDownloadImageUrl(imageUrl);
+    } else {
+      const response = await fetch(imageUrl, { mode: "cors" });
+      if (!response.ok) throw new Error("File fetch failed");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    }
+  };
+
+  const renderDownloadButton = (file) => {
+    return (
+      <IconButton
+        sx={{
+          position: "absolute",
+          top: 5,
+          left: 5,
+          bgcolor: "rgba(255,255,255,0.7)",
+          pointerEvents: "auto",
+        }}
+        onClick={() => downloadImage(file.url, file.fileName)}
+      >
+        <Download />
+      </IconButton>
+    );
+  };
 
   const loadMore = () => {
     if (displayedCount >= files.length) {
@@ -233,6 +253,11 @@ const PhotoDisplayGrid = ({
       videoSrc: file.url,
     };
   });
+
+  const closeDownloadModal = () => {
+    setIsOpenDownloadModal(false);
+    setDownloadImageUrl(null);
+  };
 
   return (
     <ImageListWrapper ref={containerRef}>
@@ -384,37 +409,6 @@ const PhotoDisplayGrid = ({
         </Box>
       </Modal>
 
-      <Modal open={!!previewImage} onClose={() => setPreviewImage(null)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "80%",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 2,
-            borderRadius: 2,
-            maxWidth: "90vw",
-            maxHeight: "90vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography sx={{ mb: 1 }}>Tap and hold to save</Typography>
-          <img
-            src={previewImage || ""}
-            alt="Preview"
-            style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: 8 }}
-          />
-          <Button sx={{ mt: 2 }} onClick={() => setPreviewImage(null)}>
-            Close
-          </Button>
-        </Box>
-      </Modal>
-
       <GenericModal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
@@ -435,6 +429,34 @@ const PhotoDisplayGrid = ({
               ) : (
                 "Delete Confirm"
               )}
+            </Button>
+          </>
+        }
+      ></GenericModal>
+
+      <GenericModal
+        open={isOpenDownloadModal}
+        onClose={closeDownloadModal}
+        title="Download Photo"
+        description="A new tab will open - tap and hold the photo to save it to your device"
+        actions={
+          <>
+            <Button onClick={closeDownloadModal}>Cancel</Button>
+            <Button
+              sx={{ minWidth: 162 }}
+              onClick={() => {
+                closeDownloadModal();
+                if (downloadImageUrl) {
+                  window.open(
+                    downloadImageUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
+                }
+              }}
+              variant="contained"
+            >
+              Download
             </Button>
           </>
         }
