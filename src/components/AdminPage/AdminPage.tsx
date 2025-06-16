@@ -12,12 +12,15 @@ const AdminPage = () => {
   const relevantFile = getUrlSearchParams("f");
 
   const handleDownloadFolderAssets = async () => {
-    setIsDownloadedFolderAssets(true);
-    const responseDownloadedFolderAssets = await getDownloadedFolderAssets(
-      relevantFile
-    );
-    setDownloadPath(responseDownloadedFolderAssets?.downloadPath);
-    setIsDownloadedFolderAssets(false);
+    try {
+      setIsDownloadedFolderAssets(true);
+      const responseDownloadedFolderAssets = await getDownloadedFolderAssets(
+        relevantFile
+      );
+      setDownloadPath(responseDownloadedFolderAssets?.downloadPath);
+    } finally {
+      setIsDownloadedFolderAssets(false);
+    }
   };
 
   return (

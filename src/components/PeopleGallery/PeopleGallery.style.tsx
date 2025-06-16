@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import styled from "styled-components";
 
 export const PeopleFaceImg = styled.img`
@@ -18,3 +19,10 @@ export const FaceCard = styled.div`
   cursor: pointer;
   text-align: center;
 `;
+
+export const WrapLoader = styled(Box)({
+  height: '65vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});

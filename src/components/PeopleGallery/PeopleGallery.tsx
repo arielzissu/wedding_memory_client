@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { fetchPeople } from "api/r2Upload";
 import { IPeople, IR2File } from "types";
-import { FaceCard, FaceGrid, PeopleFaceImg } from "./PeopleGallery.style";
+import {
+  FaceCard,
+  FaceGrid,
+  PeopleFaceImg,
+  WrapLoader,
+} from "./PeopleGallery.style";
 import PhotoDisplayGrid from "components/PhotoDisplayGrid/PhotoDisplayGrid";
 
 interface PeopleGalleryProps {
@@ -61,16 +66,9 @@ const PeopleGallery: React.FC<PeopleGalleryProps> = ({
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          height: "65vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <WrapLoader>
         <CircularProgress size={60} />
-      </Box>
+      </WrapLoader>
     );
   }
 

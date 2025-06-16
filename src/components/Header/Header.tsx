@@ -1,8 +1,18 @@
 import React, { useState } from "react";
-import { Typography, Box, Button, Popover } from "@mui/material";
+import { Button, Popover } from "@mui/material";
 import { ILocalUser } from "types";
-import { AvatarImg } from "./Header.styles";
-import GoogleIcon from "@mui/icons-material/Google";
+import {
+  AvatarImg,
+  HeaderTitle,
+  LogoImage,
+  SignedInText,
+  SignInButton,
+  StyledGoogleIcon,
+  WrapHeader,
+  WrapLogin,
+  WrapLogout,
+  WrapTitle,
+} from "./Header.styles";
 
 interface HeaderProps {
   user?: ILocalUser;
@@ -25,16 +35,9 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
   const id = open ? "user-popover" : undefined;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        m: 2,
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <img
+    <WrapHeader>
+      <WrapTitle>
+        <LogoImage
           src="/logo512.png"
           style={{
             width: "2rem",
@@ -42,16 +45,10 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
             marginRight: "0.5rem",
           }}
         />
-        <Typography
-          variant="h4"
-          fontWeight={600}
-          sx={{ fontSize: { xs: "1rem", sm: "2rem", md: "2.5rem" } }}
-        >
-          Wedding Memory
-        </Typography>
-      </Box>
+        <HeaderTitle variant="h4">Wedding Memory</HeaderTitle>
+      </WrapTitle>
       {user ? (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <WrapLogin>
           <AvatarImg
             src={user.picture}
             alt={user.name}
@@ -72,10 +69,10 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
               horizontal: "right",
             }}
           >
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+            <WrapLogout>
+              <SignedInText variant="body1">
                 Signed in as <strong>{user.name}</strong>
-              </Typography>
+              </SignedInText>
               <Button
                 variant="contained"
                 color="primary"
@@ -86,27 +83,19 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
               >
                 Sign Out
               </Button>
-            </Box>
+            </WrapLogout>
           </Popover>
-        </Box>
+        </WrapLogin>
       ) : (
-        <Button
+        <SignInButton
           variant="outlined"
-          startIcon={
-            <GoogleIcon sx={{ fontSize: "1.5rem", color: "#1A1F2D" }} />
-          }
-          sx={{
-            textTransform: "none",
-            borderColor: "#1A1F2D",
-            color: "#1A1F2D",
-            borderRadius: 2,
-          }}
+          startIcon={<StyledGoogleIcon />}
           onClick={onSignIn}
         >
           Sign in with Google
-        </Button>
+        </SignInButton>
       )}
-    </Box>
+    </WrapHeader>
   );
 };
 

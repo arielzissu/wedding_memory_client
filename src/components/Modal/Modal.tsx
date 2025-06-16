@@ -1,23 +1,29 @@
 import React from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   IconButton,
   Typography,
+  Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { StyledDialogTitle } from "./Modal.style";
+import LoaderButton from "components/LoaderButton/LoaderButton";
 
 interface GenericModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
   description?: string;
-  actions?: React.ReactNode;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
   showCloseIcon?: boolean;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   fullWidth?: boolean;
+  isLoadingConfirm?: boolean;
+  onClickConfirmButton?: () => void;
+  onClickCancelButton?: () => void;
 }
 
 const GenericModal: React.FC<GenericModalProps> = ({
@@ -25,10 +31,14 @@ const GenericModal: React.FC<GenericModalProps> = ({
   onClose,
   title = "",
   description = "",
-  actions,
+  confirmButtonText = "",
+  cancelButtonText = "",
   showCloseIcon = true,
   maxWidth = "sm",
   fullWidth = true,
+  isLoadingConfirm = false,
+  onClickConfirmButton = () => {},
+  onClickCancelButton = () => {},
 }) => {
   return (
     <Dialog
@@ -37,26 +47,29 @@ const GenericModal: React.FC<GenericModalProps> = ({
       maxWidth={maxWidth}
       fullWidth={fullWidth}
     >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <StyledDialogTitle>
         {title}
         {showCloseIcon && (
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
         )}
-      </DialogTitle>
+      </StyledDialogTitle>
 
       <DialogContent dividers>
         <Typography>{description}</Typography>
       </DialogContent>
 
-      {actions && <DialogActions>{actions}</DialogActions>}
+      <DialogActions>
+        {cancelButtonText !== "" && (
+          <Button onClick={onClickCancelButton}>{cancelButtonText}</Button>
+        )}
+        <LoaderButton
+          onClick={onClickConfirmButton}
+          isLoading={isLoadingConfirm}
+          buttonText={confirmButtonText}
+        />
+      </DialogActions>
     </Dialog>
   );
 };

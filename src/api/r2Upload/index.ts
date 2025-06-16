@@ -64,7 +64,7 @@ export const getDownloadedFolderAssets = async (
   folderPath: string
 ): Promise<{ downloadPath: string }> => {
   return await request({
-    uri: `/cloudinary/download-folder-assets`,
+    uri: `/r2/download-folder-assets`,
     method: "GET",
     params: {
       folderPath,

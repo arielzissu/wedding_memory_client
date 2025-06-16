@@ -1,18 +1,18 @@
 import React, { SyntheticEvent, useEffect, useRef, useState } from "react";
+import {
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import {
   getFromLocalStorage,
   removeFromLocalStorage,
 } from "utils/localStorage";
 import LoginModal, { USER_DATA_KEY } from "components/Login/Login";
-import {
-  Box,
-  BottomNavigation,
-  BottomNavigationAction,
-  Fab,
-  CircularProgress,
-  Button,
-} from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import {
   CloudUpload,
   Image,
@@ -30,15 +30,16 @@ import PeopleGallery from "components/PeopleGallery/PeopleGallery";
 import UserPhotos from "components/UserPhotos/UserPhotos";
 import snackbarStore from "stores/snackbarStore";
 import { getPollUploadsStatusIntervalTime } from "utils/file";
-import {
-  useNavigate,
-  useLocation,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
 import { PATH_TO_TAB, TAB_TO_PATH } from "constants/app";
 import GenericModal from "components/Modal/Modal";
+import AdminPage from "components/AdminPage/AdminPage";
+import {
+  StyledBottomNavigation,
+  StyledBottomNavigationAction,
+  WrapRoutes,
+  UploadFab,
+  WrapApp,
+} from "App.styles";
 
 const MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 * 1024; // = 0.5 GB
 const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
@@ -200,32 +201,13 @@ export const App = () => {
 
   return (
     <>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
+      <WrapApp>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
 
-        <Fab
+        <UploadFab
           color="primary"
           aria-label="upload"
-          sx={{
-            position: "fixed",
-            bottom: 80,
-            right: 16,
-            animation: shouldShowUploadButton ? "pulse 1.5s infinite" : "none",
-            "@keyframes pulse": {
-              "0%": {
-                transform: "scale(1)",
-                boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
-              },
-              "50%": {
-                transform: "scale(1.15)",
-                boxShadow: "0 0 15px 5px rgba(0, 0, 0, 0.4)",
-              },
-              "100%": {
-                transform: "scale(1)",
-                boxShadow: "0 0 0 0 rgba(0, 0, 0, 0.2)",
-              },
-            },
-          }}
+          animate={shouldShowUploadButton}
           onClick={onClickFileInput}
           disabled={isLoadingUpload}
         >
@@ -234,7 +216,7 @@ export const App = () => {
           ) : (
             <CloudUpload />
           )}
-        </Fab>
+        </UploadFab>
 
         <input
           ref={fileInputRef}
@@ -245,74 +227,40 @@ export const App = () => {
           onChange={handleFileChange}
         />
 
-        <BottomNavigation
-          value={currentTab}
-          onChange={handleChange}
-          sx={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: `calc(64px + env(safe-area-inset-bottom))`,
-            paddingBottom: "env(safe-area-inset-bottom)",
-            bgcolor: "background.paper",
-            boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
-            zIndex: 1000,
-          }}
-        >
-          <BottomNavigationAction
+        <StyledBottomNavigation value={currentTab} onChange={handleChange}>
+          <StyledBottomNavigationAction
             value={TabsOptions.MY_PHOTO}
             label="My Photos"
             showLabel
             icon={<PhotoCamera />}
-            sx={{
-              color:
-                currentTab === TabsOptions.MY_PHOTO
-                  ? "primary.main"
-                  : "text.secondary",
-            }}
+            selected={currentTab === TabsOptions.MY_PHOTO}
           />
-          <BottomNavigationAction
+          <StyledBottomNavigationAction
             value={TabsOptions.GALLERY}
             label="Gallery"
             showLabel
             icon={<Image />}
-            sx={{
-              color:
-                currentTab === TabsOptions.GALLERY
-                  ? "primary.main"
-                  : "text.secondary",
-            }}
+            selected={currentTab === TabsOptions.GALLERY}
           />
-          <BottomNavigationAction
+          <StyledBottomNavigationAction
             value={TabsOptions.PEOPLE}
             label="People"
             showLabel
             icon={<PeopleIcon />}
-            sx={{
-              color:
-                currentTab === TabsOptions.PEOPLE
-                  ? "primary.main"
-                  : "text.secondary",
-            }}
+            selected={currentTab === TabsOptions.PEOPLE}
           />
           {isAdminUser && (
-            <BottomNavigationAction
+            <StyledBottomNavigationAction
               value={TabsOptions.ADMIN}
               label="Admin"
               showLabel
               icon={<AdminPanelSettings />}
-              sx={{
-                color:
-                  currentTab === TabsOptions.ADMIN
-                    ? "primary.main"
-                    : "text.secondary",
-              }}
+              selected={currentTab === TabsOptions.ADMIN}
             />
           )}
-        </BottomNavigation>
+        </StyledBottomNavigation>
 
-        <Box sx={{ flex: 1, overflow: "auto", p: 2, pb: 7, mb: 8 }}>
+        <WrapRoutes>
           <Routes>
             <Route
               path={TAB_TO_PATH.my_photo}
@@ -337,7 +285,8 @@ export const App = () => {
                 />
               }
             />
-            {/* {isAdminUser && <Route path={TAB_TO_PATH.admin} element={<AdminPage />} />}  */}
+
+            <Route path={TAB_TO_PATH.admin} element={<AdminPage />} />
 
             <Route
               path="*"
@@ -349,8 +298,8 @@ export const App = () => {
               }
             />
           </Routes>
-        </Box>
-      </Box>
+        </WrapRoutes>
+      </WrapApp>
       <GlobalSnackbar />
       {isOpenLoginModal && (
         <LoginModal
@@ -368,20 +317,11 @@ export const App = () => {
         onClose={() => setIsOpenUploadModal(false)}
         title="upload photos"
         description={`You can upload photos up to ${MAX_SIZE_IN_GB} GB. Please select the files you want to upload.`}
-        actions={
-          <>
-            <Button
-              sx={{ minWidth: 162 }}
-              onClick={() => {
-                onClickFileInput();
-                setIsOpenUploadModal(false);
-              }}
-              variant="contained"
-            >
-              Upload Photos
-            </Button>
-          </>
-        }
+        confirmButtonText="Upload Photos"
+        onClickConfirmButton={() => {
+          onClickFileInput();
+          setIsOpenUploadModal(false);
+        }}
       ></GenericModal>
     </>
   );
