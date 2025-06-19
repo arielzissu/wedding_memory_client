@@ -41,19 +41,19 @@
 export const getPollUploadsStatusIntervalTime = (totalSize: number): number => {
   // Less than 0.1 GB:
   if (totalSize < 100 * 1024 * 1024) {
-    return 1000;
+    return 3000;
   }
   // Less than 0.3 GB:
   if (totalSize < 300 * 1024 * 1024) {
-    return 3000;
+    return 5000;
   }
   // Less than 0.5 GB:
   if (totalSize < 500 * 1024 * 1024) {
-    return 5000;
+    return 7000;
   }
   // Less than 1 GB:
   if (totalSize < 1024 * 1024 * 1024) {
-    return 8000;
+    return 9000;
   }
   // More than 1 GB:
   return 10000;

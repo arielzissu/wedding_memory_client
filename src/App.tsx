@@ -23,7 +23,11 @@ import {
 import Header from "components/Header/Header";
 import { ILocalUser, IR2File, TabsOptions } from "types";
 import { fetchPhotos, getUploadStatus, uploadPhotos } from "api/r2Upload";
-import { SUPPORTED_MEDIA_FORMATS } from "constants/file";
+import {
+  MAX_SIZE_IN_BYTES,
+  MAX_SIZE_IN_GB,
+  SUPPORTED_MEDIA_FORMATS,
+} from "constants/file";
 import { getUrlSearchParams } from "utils/navigation";
 import GlobalSnackbar from "components/GlobalSnackbar/GlobalSnackbar";
 import PeopleGallery from "components/PeopleGallery/PeopleGallery";
@@ -40,9 +44,6 @@ import {
   UploadFab,
   WrapApp,
 } from "App.styles";
-
-const MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 * 1024; // = 0.5 GB
-const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
 
 export const App = () => {
   const [files, setFiles] = useState<IR2File[]>([]);
@@ -88,17 +89,14 @@ export const App = () => {
   useEffect(() => {
     getUserEmail();
     fetchImages();
+    const timer = setTimeout(() => setIsFiveSecondsPassed(true), 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (!userEmail) return;
     setLoggedUserFiles(files.filter((f) => f.metadata.uploader === userEmail));
   }, [files, userEmail]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsFiveSecondsPassed(true), 5000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleChange = (_e: SyntheticEvent, newValue: TabsOptions) => {
     setCurrentTab(newValue);
@@ -139,20 +137,25 @@ export const App = () => {
     }, 120000);
   };
 
-  const handleFileChange = async (event) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     event.preventDefault();
-    event.stopPropagation();
-    if (!userEmail) {
+
+    const selectedFiles = Array.from(event.target.files || []);
+
+    if (!userEmail || selectedFiles.length === 0) {
       setIsOpenLoginModal(true);
       return;
     }
 
-    const inputFiles = event.target.files;
-    const selectedFiles: File[] = Array.from(inputFiles);
-
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > MAX_SIZE_IN_BYTES) {
-      console.warn(`The total file size exceeds ${MAX_SIZE_IN_GB} GB.`);
+      console.warn();
+      snackbarStore.show(
+        `The total file size exceeds ${MAX_SIZE_IN_GB} GB.`,
+        "warning"
+      );
       return;
     }
 
@@ -163,21 +166,18 @@ export const App = () => {
 
     try {
       setIsLoadingUpload(true);
-
       snackbarStore.show("Preparing your photos for upload...", "info", null);
-
-      const uploadedFileResponse = await uploadPhotos(
+      const { uploadId } = await uploadPhotos(
         formData,
         relevantFile,
         userEmail
       );
-
       snackbarStore.show(
         "Uploading your photos... They'll appear here once ready",
         "info",
         null
       );
-      pollUploadStatus(uploadedFileResponse.uploadId, totalSize);
+      pollUploadStatus(uploadId, totalSize);
     } catch (err) {
       console.error("Upload failed", err);
     } finally {
@@ -197,6 +197,105 @@ export const App = () => {
     setIsOpenLoginModal(true);
   };
 
+  const renderUploadButton = () => {
+    return (
+      <UploadFab
+        color="primary"
+        aria-label="upload"
+        animate={shouldShowUploadButton}
+        onClick={onClickFileInput}
+        disabled={isLoadingUpload}
+      >
+        {isLoadingUpload ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          <CloudUpload />
+        )}
+      </UploadFab>
+    );
+  };
+
+  const renderRoutes = () => {
+    return (
+      <WrapRoutes>
+        <Routes>
+          <Route
+            path={TAB_TO_PATH.my_photo}
+            element={
+              <UserPhotos
+                loggedUserFiles={loggedUserFiles}
+                setLoggedUserFiles={setLoggedUserFiles}
+              />
+            }
+          />
+          <Route
+            path={TAB_TO_PATH.gallery}
+            element={<ImageGallery files={files} setFiles={setFiles} />}
+          />
+          <Route
+            path={TAB_TO_PATH.people}
+            element={
+              <PeopleGallery
+                userEmail={userEmail}
+                relevantFile={relevantFile}
+                files={files}
+              />
+            }
+          />
+
+          <Route path={TAB_TO_PATH.admin} element={<AdminPage />} />
+
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to={TAB_TO_PATH.gallery + "/" + location.search}
+                replace
+              />
+            }
+          />
+        </Routes>
+      </WrapRoutes>
+    );
+  };
+
+  const renderBottomNavigation = () => {
+    return (
+      <StyledBottomNavigation value={currentTab} onChange={handleChange}>
+        <StyledBottomNavigationAction
+          value={TabsOptions.MY_PHOTO}
+          label="My Photos"
+          showLabel
+          icon={<PhotoCamera />}
+          selected={currentTab === TabsOptions.MY_PHOTO}
+        />
+        <StyledBottomNavigationAction
+          value={TabsOptions.GALLERY}
+          label="Gallery"
+          showLabel
+          icon={<Image />}
+          selected={currentTab === TabsOptions.GALLERY}
+        />
+        <StyledBottomNavigationAction
+          value={TabsOptions.PEOPLE}
+          label="People"
+          showLabel
+          icon={<PeopleIcon />}
+          selected={currentTab === TabsOptions.PEOPLE}
+        />
+        {isAdminUser && (
+          <StyledBottomNavigationAction
+            value={TabsOptions.ADMIN}
+            label="Admin"
+            showLabel
+            icon={<AdminPanelSettings />}
+            selected={currentTab === TabsOptions.ADMIN}
+          />
+        )}
+      </StyledBottomNavigation>
+    );
+  };
+
   const shouldShowUploadButton = !userEmail && isFiveSecondsPassed;
 
   return (
@@ -204,19 +303,7 @@ export const App = () => {
       <WrapApp>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
 
-        <UploadFab
-          color="primary"
-          aria-label="upload"
-          animate={shouldShowUploadButton}
-          onClick={onClickFileInput}
-          disabled={isLoadingUpload}
-        >
-          {isLoadingUpload ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            <CloudUpload />
-          )}
-        </UploadFab>
+        {renderUploadButton()}
 
         <input
           ref={fileInputRef}
@@ -227,80 +314,13 @@ export const App = () => {
           onChange={handleFileChange}
         />
 
-        <StyledBottomNavigation value={currentTab} onChange={handleChange}>
-          <StyledBottomNavigationAction
-            value={TabsOptions.MY_PHOTO}
-            label="My Photos"
-            showLabel
-            icon={<PhotoCamera />}
-            selected={currentTab === TabsOptions.MY_PHOTO}
-          />
-          <StyledBottomNavigationAction
-            value={TabsOptions.GALLERY}
-            label="Gallery"
-            showLabel
-            icon={<Image />}
-            selected={currentTab === TabsOptions.GALLERY}
-          />
-          <StyledBottomNavigationAction
-            value={TabsOptions.PEOPLE}
-            label="People"
-            showLabel
-            icon={<PeopleIcon />}
-            selected={currentTab === TabsOptions.PEOPLE}
-          />
-          {isAdminUser && (
-            <StyledBottomNavigationAction
-              value={TabsOptions.ADMIN}
-              label="Admin"
-              showLabel
-              icon={<AdminPanelSettings />}
-              selected={currentTab === TabsOptions.ADMIN}
-            />
-          )}
-        </StyledBottomNavigation>
+        {renderBottomNavigation()}
 
-        <WrapRoutes>
-          <Routes>
-            <Route
-              path={TAB_TO_PATH.my_photo}
-              element={
-                <UserPhotos
-                  loggedUserFiles={loggedUserFiles}
-                  setLoggedUserFiles={setLoggedUserFiles}
-                />
-              }
-            />
-            <Route
-              path={TAB_TO_PATH.gallery}
-              element={<ImageGallery files={files} setFiles={setFiles} />}
-            />
-            <Route
-              path={TAB_TO_PATH.people}
-              element={
-                <PeopleGallery
-                  userEmail={userEmail}
-                  relevantFile={relevantFile}
-                  files={files}
-                />
-              }
-            />
-
-            <Route path={TAB_TO_PATH.admin} element={<AdminPage />} />
-
-            <Route
-              path="*"
-              element={
-                <Navigate
-                  to={TAB_TO_PATH.gallery + "/" + location.search}
-                  replace
-                />
-              }
-            />
-          </Routes>
-        </WrapRoutes>
+        {renderRoutes()}
       </WrapApp>
+
       <GlobalSnackbar />
+
       {isOpenLoginModal && (
         <LoginModal
           isOpen={isOpenLoginModal}

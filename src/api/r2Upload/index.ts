@@ -62,7 +62,7 @@ export const getUploadStatus = async (
 
 export const getDownloadedFolderAssets = async (
   folderPath: string
-): Promise<{ downloadPath: string }> => {
+): Promise<{ downloadUrl: string }> => {
   return await request({
     uri: `/r2/download-folder-assets`,
     method: "GET",
@@ -78,6 +78,23 @@ export const deletePhoto = async (userEmail: string, fileName: string) => {
     method: "DELETE",
     data: {
       userEmail,
+      fileName,
+    },
+  });
+};
+
+export const deleteDBData = async () => {
+  return await request({
+    uri: `/r2/delete-db-data`,
+    method: "DELETE",
+  });
+};
+
+export const deleteWeddingMedia = async (fileName: string) => {
+  return await request({
+    uri: `/r2/delete-wedding-media`,
+    method: "DELETE",
+     data: {
       fileName,
     },
   });

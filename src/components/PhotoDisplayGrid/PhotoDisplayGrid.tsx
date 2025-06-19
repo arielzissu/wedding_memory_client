@@ -360,24 +360,7 @@ const PhotoDisplayGrid = ({
         onClickConfirmButton={() => {
           closeDownloadModal();
           if (downloadPhotoUrl) {
-            const blob = new Blob(
-              [
-                `
-  <html>
-    <body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <video controls src="${downloadPhotoUrl}" style="max-width:100%; height:auto;"></video>
-      <br/>
-      <a href="${downloadPhotoUrl}" download style="font-size:18px;">Download Video</a>
-    </body>
-  </html>
-`,
-              ],
-              { type: "text/html" }
-            );
-
-            const url = URL.createObjectURL(blob);
-            window.open(url, "_blank", "noopener,noreferrer");
-            // window.open(downloadPhotoUrl, "_blank", "noopener,noreferrer");
+            window.open(downloadPhotoUrl, "_blank", "noopener,noreferrer");
           }
         }}
       ></GenericModal>

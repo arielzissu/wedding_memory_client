@@ -14,15 +14,18 @@ export const SUPPORTED_MEDIA_FORMATS = [
 
   // Video types
   "video/mp4",
-  "video/quicktime",   // for .mov (iPhone)
-  "video/x-msvideo",   // avi
-  "video/x-ms-wmv",    // wmv
-  "video/x-flv",       // flv
-  "video/x-matroska",  // mkv
+  "video/quicktime", // for .mov (iPhone)
+  "video/x-msvideo", // avi
+  "video/x-ms-wmv", // wmv
+  "video/x-flv", // flv
+  "video/x-matroska", // mkv
   "video/webm",
   "video/ogg",
-  "video/3gpp",        // 3gp
-  "video/3gpp2",       // 3g2
-  "video/MP2T",        // ts, m2ts
-  "video/mxf"          // mxf
+  "video/3gpp", // 3gp
+  "video/3gpp2", // 3g2
+  "video/MP2T", // ts, m2ts
+  "video/mxf", // mxf
 ];
+
+export const MAX_SIZE_IN_BYTES = 3 * 1024 * 1024 * 1024; // = 0.5 GB
+export const MAX_SIZE_IN_GB = MAX_SIZE_IN_BYTES / (1024 * 1024 * 1024);
