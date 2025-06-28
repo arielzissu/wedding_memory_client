@@ -29,12 +29,11 @@ export interface IUploadStatusResponse {
   status: string;
   totalFiles: number;
   processedFiles: number;
-  error: any;
+  error: string;
   updatedAt: Date;
   uploaderEmail: string;
   weddingName: string;
 }
-
 
 export enum TabsOptions {
   MY_PHOTO = "my_photo",

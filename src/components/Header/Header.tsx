@@ -92,7 +92,7 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
           startIcon={<StyledGoogleIcon />}
           onClick={onSignIn}
         >
-          Sign in with Google
+          Sign in
         </SignInButton>
       )}
     </WrapHeader>

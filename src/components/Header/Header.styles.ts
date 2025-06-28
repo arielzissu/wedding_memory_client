@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { styled as MuiStyled } from "@mui/material/styles";
 import { Box, Button, Typography } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google"; // or your specific import
+import GoogleSVG from "../../svg/google";
 
 export const AvatarImg = styled.img`
   position: relative;
@@ -25,7 +25,8 @@ export const WrapHeader = styled(Box)(() => ({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  margin: "16px",
+  padding: "16px",
+  backgroundColor: "white",
 }));
 
 export const WrapTitle = styled(Box)(() => ({
@@ -46,26 +47,35 @@ export const SignedInText = styled(Typography)({
   marginBottom: "8px",
 });
 
-export const StyledGoogleIcon = styled(GoogleIcon)({
+export const StyledGoogleIcon = styled(GoogleSVG)({
   fontSize: "1.5rem",
   color: "#1A1F2D",
 });
 
-export const SignInButton = styled(Button)({
-  textTransform: "none",
-  borderColor: "#1A1F2D",
-  color: "#1A1F2D",
-  borderRadius: 8,
-});
+export const SignInButton = styled(Button)`
+  border-color: #1a1f2d;
+  color: #1a1f2d;
+  border-radius: 8px;
+  padding: 5px 12px !important;
+  text-transform: capitalize !important;
+`;
 
 export const HeaderTitle = MuiStyled(Typography)(({ theme }) => ({
-  fontWeight: 600,
+  color: "#de2260",
   fontSize: "1rem",
+  lineHeight: "1.75rem",
+  fontWeight: 600,
+  [theme.breakpoints.up(374)]: {
+    fontSize: "1.25rem",
+  },
+  [theme.breakpoints.up(424)]: {
+    fontSize: "1.4rem",
+  },
   [theme.breakpoints.up("sm")]: {
-    fontSize: "2rem",
+    fontSize: "1.5rem",
   },
   [theme.breakpoints.up("md")]: {
-    fontSize: "2.5rem",
+    fontSize: "1.75rem",
   },
 }));
 

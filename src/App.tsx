@@ -12,7 +12,7 @@ import {
   removeFromLocalStorage,
 } from "utils/localStorage";
 import LoginModal, { USER_DATA_KEY } from "components/Login/Login";
-import { CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import {
   CloudUpload,
   Image,
@@ -42,7 +42,9 @@ import {
   StyledBottomNavigationAction,
   WrapRoutes,
   UploadFab,
-  WrapApp,
+  WrapVisualApp,
+  MainApp,
+  Indicator,
 } from "App.styles";
 
 export const App = () => {
@@ -57,6 +59,13 @@ export const App = () => {
   const [isFiveSecondsPassed, setIsFiveSecondsPassed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const relevantFile: string = getUrlSearchParams("f");
+
+  const tabOrder: TabsOptions[] = [
+    TabsOptions.MY_PHOTO,
+    TabsOptions.GALLERY,
+    TabsOptions.PEOPLE,
+    TabsOptions.ADMIN,
+  ];
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,6 +94,8 @@ export const App = () => {
       setFiles(photosResponse);
     }
   };
+  const [indicatorLeft, setIndicatorLeft] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getUserEmail();
@@ -97,6 +108,20 @@ export const App = () => {
     if (!userEmail) return;
     setLoggedUserFiles(files.filter((f) => f.metadata.uploader === userEmail));
   }, [files, userEmail]);
+
+  useEffect(() => {
+    const nav = containerRef.current;
+    if (!nav) return;
+
+    const tabIndex = tabOrder.indexOf(currentTab);
+    const action = nav.querySelectorAll(".MuiBottomNavigationAction-root")[
+      tabIndex
+    ];
+    if (action) {
+      const { offsetLeft, offsetWidth } = action as HTMLElement;
+      setIndicatorLeft(offsetLeft + offsetWidth / 2 - 20);
+    }
+  }, [currentTab, userEmail]);
 
   const handleChange = (_e: SyntheticEvent, newValue: TabsOptions) => {
     setCurrentTab(newValue);
@@ -143,15 +168,18 @@ export const App = () => {
     event.preventDefault();
 
     const selectedFiles = Array.from(event.target.files || []);
-
-    if (!userEmail || selectedFiles.length === 0) {
+    if (selectedFiles.length === 0) {
+      return;
+    }
+    if (!userEmail) {
       setIsOpenLoginModal(true);
       return;
     }
 
     const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     if (totalSize > MAX_SIZE_IN_BYTES) {
-      console.warn();
+      const warnMsg = `The total file size exceeds ${MAX_SIZE_IN_GB} GB.`;
+      console.warn(warnMsg);
       snackbarStore.show(
         `The total file size exceeds ${MAX_SIZE_IN_GB} GB.`,
         "warning"
@@ -173,7 +201,7 @@ export const App = () => {
         userEmail
       );
       snackbarStore.show(
-        "Uploading your photos... They'll appear here once ready",
+        "Uploading your photos...\nThey'll appear here once ready",
         "info",
         null
       );
@@ -200,7 +228,7 @@ export const App = () => {
   const renderUploadButton = () => {
     return (
       <UploadFab
-        color="primary"
+        sx={{ backgroundColor: "rgb(225, 29, 72)", color: "white" }}
         aria-label="upload"
         animate={shouldShowUploadButton}
         onClick={onClickFileInput}
@@ -225,6 +253,7 @@ export const App = () => {
               <UserPhotos
                 loggedUserFiles={loggedUserFiles}
                 setLoggedUserFiles={setLoggedUserFiles}
+                onClickFileInput={onClickFileInput}
               />
             }
           />
@@ -261,46 +290,49 @@ export const App = () => {
 
   const renderBottomNavigation = () => {
     return (
-      <StyledBottomNavigation value={currentTab} onChange={handleChange}>
-        <StyledBottomNavigationAction
-          value={TabsOptions.MY_PHOTO}
-          label="My Photos"
-          showLabel
-          icon={<PhotoCamera />}
-          selected={currentTab === TabsOptions.MY_PHOTO}
-        />
-        <StyledBottomNavigationAction
-          value={TabsOptions.GALLERY}
-          label="Gallery"
-          showLabel
-          icon={<Image />}
-          selected={currentTab === TabsOptions.GALLERY}
-        />
-        <StyledBottomNavigationAction
-          value={TabsOptions.PEOPLE}
-          label="People"
-          showLabel
-          icon={<PeopleIcon />}
-          selected={currentTab === TabsOptions.PEOPLE}
-        />
-        {isAdminUser && (
+      <Box position="relative" ref={containerRef}>
+        <StyledBottomNavigation value={currentTab} onChange={handleChange}>
+          <Indicator style={{ left: indicatorLeft }} />
           <StyledBottomNavigationAction
-            value={TabsOptions.ADMIN}
-            label="Admin"
+            value={TabsOptions.MY_PHOTO}
+            label="My Photos"
             showLabel
-            icon={<AdminPanelSettings />}
-            selected={currentTab === TabsOptions.ADMIN}
+            icon={<PhotoCamera />}
+            selected={currentTab === TabsOptions.MY_PHOTO}
           />
-        )}
-      </StyledBottomNavigation>
+          <StyledBottomNavigationAction
+            value={TabsOptions.GALLERY}
+            label="Gallery"
+            showLabel
+            icon={<Image />}
+            selected={currentTab === TabsOptions.GALLERY}
+          />
+          <StyledBottomNavigationAction
+            value={TabsOptions.PEOPLE}
+            label="People"
+            showLabel
+            icon={<PeopleIcon />}
+            selected={currentTab === TabsOptions.PEOPLE}
+          />
+          {isAdminUser && (
+            <StyledBottomNavigationAction
+              value={TabsOptions.ADMIN}
+              label="Admin"
+              showLabel
+              icon={<AdminPanelSettings />}
+              selected={currentTab === TabsOptions.ADMIN}
+            />
+          )}
+        </StyledBottomNavigation>
+      </Box>
     );
   };
 
   const shouldShowUploadButton = !userEmail && isFiveSecondsPassed;
 
   return (
-    <>
-      <WrapApp>
+    <MainApp>
+      <WrapVisualApp>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
 
         {renderUploadButton()}
@@ -317,7 +349,7 @@ export const App = () => {
         {renderBottomNavigation()}
 
         {renderRoutes()}
-      </WrapApp>
+      </WrapVisualApp>
 
       <GlobalSnackbar />
 
@@ -343,6 +375,6 @@ export const App = () => {
           setIsOpenUploadModal(false);
         }}
       ></GenericModal>
-    </>
+    </MainApp>
   );
 };

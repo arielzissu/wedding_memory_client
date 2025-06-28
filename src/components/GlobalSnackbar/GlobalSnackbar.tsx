@@ -22,7 +22,12 @@ const GlobalSnackbar = observer(() => {
         variant="filled"
         sx={{ width: "100%" }}
       >
-        {message}
+        {message.split("\n").map((line, index) => (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+        ))}
       </Alert>
     </Snackbar>
   );

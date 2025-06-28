@@ -14,7 +14,6 @@ interface GoogleLoginModalProps {
 }
 
 const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
-
   const handleLoginSuccess = (credentialResponse) => {
     try {
       const decodedToken: ILocalUser & JwtPayload = jwtDecode(
@@ -39,7 +38,9 @@ const LoginModal = ({ isOpen, onClose }: GoogleLoginModalProps) => {
 
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Sign in with Google</DialogTitle>
+      <DialogTitle sx={{ textAlign: "center" }}>
+        For Upload photos please <strong>sign in</strong> with Google
+      </DialogTitle>
       <DialogContent>
         <Box
           display="flex"

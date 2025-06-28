@@ -239,8 +239,9 @@ const PhotoDisplayGrid = ({
     setDownloadPhotoUrl(null);
   };
 
-  return (
-    <ImageListWrapper ref={containerRef}>
+  const renderZoomButtons = () => {
+    if (displayedFiles.length === 0) return null;
+    return (
       <WrapZoomLevel>
         <IconButton
           onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}
@@ -254,6 +255,12 @@ const PhotoDisplayGrid = ({
           <StyledZoomIn />
         </IconButton>
       </WrapZoomLevel>
+    );
+  };
+
+  return (
+    <ImageListWrapper ref={containerRef}>
+      {renderZoomButtons()}
 
       <InfiniteScroll
         dataLength={displayedFiles.length}
