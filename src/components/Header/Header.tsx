@@ -74,6 +74,9 @@ const Header = ({ user, onSignOut, onSignIn }: HeaderProps) => {
                 Signed in as <strong>{user.name}</strong>
               </SignedInText>
               <Button
+                sx={{
+                  background: "linear-gradient(to right, #f43f5e, #ec4899)",
+                }}
                 variant="contained"
                 color="primary"
                 onClick={() => {

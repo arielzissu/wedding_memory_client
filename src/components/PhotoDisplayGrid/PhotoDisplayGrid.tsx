@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, IconButton, Modal } from "@mui/material";
+import { Box, Modal } from "@mui/material";
 import { Delete, Close, ArrowUpward, Download } from "@mui/icons-material";
 import { Gallery } from "react-grid-gallery";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -22,7 +22,8 @@ import {
   VideoPlayButton,
   WrapPhotosCarousel,
   WrapZoomLevel,
-  ZoomLevelValue,
+  ZoomButton,
+  Line,
 } from "./PhotoDisplayGrid.styles";
 import { IR2File } from "types";
 import { deletePhoto } from "api/r2Upload";
@@ -243,17 +244,17 @@ const PhotoDisplayGrid = ({
     if (displayedFiles.length === 0) return null;
     return (
       <WrapZoomLevel>
-        <IconButton
-          onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}
-        >
-          <StyledZoomOut />
-        </IconButton>
-        <ZoomLevelValue>{zoomLevel}px</ZoomLevelValue>
-        <IconButton
+        <ZoomButton
           onClick={() => setZoomLevel((prev) => Math.min(prev + 50, 400))}
         >
           <StyledZoomIn />
-        </IconButton>
+        </ZoomButton>
+        <Line />
+        <ZoomButton
+          onClick={() => setZoomLevel((prev) => Math.max(prev - 50, 100))}
+        >
+          <StyledZoomOut />
+        </ZoomButton>
       </WrapZoomLevel>
     );
   };

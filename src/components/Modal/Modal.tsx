@@ -5,10 +5,9 @@ import {
   DialogActions,
   IconButton,
   Typography,
-  Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { StyledDialogTitle } from "./Modal.style";
+import { CancelButton, StyledDialogTitle } from "./Modal.style";
 import LoaderButton from "components/LoaderButton/LoaderButton";
 
 interface GenericModalProps {
@@ -62,7 +61,9 @@ const GenericModal: React.FC<GenericModalProps> = ({
 
       <DialogActions>
         {cancelButtonText !== "" && (
-          <Button onClick={onClickCancelButton}>{cancelButtonText}</Button>
+          <CancelButton onClick={onClickCancelButton}>
+            {cancelButtonText}
+          </CancelButton>
         )}
         <LoaderButton
           onClick={onClickConfirmButton}

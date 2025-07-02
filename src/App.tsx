@@ -228,7 +228,10 @@ export const App = () => {
   const renderUploadButton = () => {
     return (
       <UploadFab
-        sx={{ backgroundColor: "rgb(225, 29, 72)", color: "white" }}
+        sx={{
+          background: "linear-gradient(to right, #f43f5e, #ec4899)",
+          color: "white",
+        }}
         aria-label="upload"
         animate={shouldShowUploadButton}
         onClick={onClickFileInput}
@@ -330,10 +333,26 @@ export const App = () => {
 
   const shouldShowUploadButton = !userEmail && isFiveSecondsPassed;
 
+  const HeroPicture = () => {
+    return (
+      <div
+        style={{
+          backgroundImage: "url('../../assets/hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "0 -20px",
+          backgroundRepeat: "no-repeat",
+          width: "100%",
+          height: "200px",
+        }}
+      ></div>
+    );
+  };
+
   return (
     <MainApp>
       <WrapVisualApp>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
+        <HeroPicture />
 
         {renderUploadButton()}
 

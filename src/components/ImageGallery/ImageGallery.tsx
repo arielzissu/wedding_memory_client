@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { IR2File } from "../../types";
 import {
   ContainImageGallery,
+  CountsGrid,
   StatCard,
   StatLabel,
   StatNumber,
+  StatText,
   StyledSubtitle,
   StyledTab,
   StyledTabs,
@@ -88,27 +90,33 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ files, setFiles }) => {
     return "Wedding guests haven't shared any photos or videos yet";
   };
 
-  const MemoryStats = () => {
+  const MemoryCounts = () => {
     return (
-      <Box display="flex" gap={2} mt={3} mb={2}>
-        <StatCard bg="#fbf4fc" border="#fbcfe8" color="#f43f5e">
-          <CameraAltOutlined fontSize="medium" />
-          <StatNumber>{photos.length}</StatNumber>
-          <StatLabel>Photos</StatLabel>
+      <CountsGrid>
+        <StatCard gradient="rose" color="#f43f5e">
+          <CameraAltOutlined className="icon rose" />
+          <StatText>
+            <StatNumber>{photos.length}</StatNumber>
+            <StatLabel>Photos</StatLabel>
+          </StatText>
         </StatCard>
 
-        <StatCard bg="#fef3f8" border="#e9d5ff" color="#a855f7">
-          <VideoCameraFrontOutlined fontSize="medium" />
-          <StatNumber>{videos.length}</StatNumber>
-          <StatLabel>Videos</StatLabel>
+        <StatCard gradient="purple" color="#a855f7">
+          <VideoCameraFrontOutlined className="icon purple" />
+          <StatText>
+            <StatNumber>{videos.length}</StatNumber>
+            <StatLabel>Videos</StatLabel>
+          </StatText>
         </StatCard>
 
-        <StatCard bg="#fff9ec" border="#fde68a" color="#f59e0b">
-          <Group fontSize="medium" />
-          <StatNumber>{uploaderNumbers}</StatNumber>
-          <StatLabel>Guests</StatLabel>
+        <StatCard gradient="amber" color="#f59e0b">
+          <Group className="icon amber" />
+          <StatText>
+            <StatNumber>{uploaderNumbers}</StatNumber>
+            <StatLabel>Guests</StatLabel>
+          </StatText>
         </StatCard>
-      </Box>
+      </CountsGrid>
     );
   };
 
@@ -144,7 +152,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ files, setFiles }) => {
 
       <StyledSubtitle>Shared memories from all our guests</StyledSubtitle>
 
-      <MemoryStats />
+      <MemoryCounts />
 
       <Box maxWidth={400} mx="auto" mb={3}>
         <StyledTabs

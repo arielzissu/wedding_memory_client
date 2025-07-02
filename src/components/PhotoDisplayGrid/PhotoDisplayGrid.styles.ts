@@ -21,34 +21,100 @@ export const SwiperWrapper = styled.div`
     display: flex;
     align-items: center;
   }
+  .swiper-pagination-bullet-active {
+    background: linear-gradient(to right, #f43f5e, #ec4899) !important;
+  }
+  .swiper-button-prev {
+    color: #f43f5e !important;
+  }
+  .swiper-button-next {
+    color: #f43f5e !important;
+  }
+  .swiper-button-prev:after {
+    background: rgba(255, 255, 255, 0.4) !important;
+    padding: 8px !important;
+    border-radius: 10px !important;
+  }
+  .swiper-button-next:after {
+    background: rgba(255, 255, 255, 0.4) !important;
+    padding: 8px !important;
+    border-radius: 10px !important;
+  }
 `;
 
-export const WrapZoomLevel = styled(Box)({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: "16px",
+export const WrapZoomLevel = styled(Box)`
+  position: fixed;
+  left: 8px;
+  bottom: 90px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+`;
+
+export const ZoomButton = styled(IconButton)({
+  backgroundColor: "#fff",
+  border: "1px solid #e5e7eb",
+  borderRadius: "8px",
+  padding: "8px",
+  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+  transition: "background-color 0.2s ease, transform 0.1s ease",
+
+  "&:hover": {
+    backgroundColor: "#f3f4f6",
+  },
+
+  "&:active": {
+    transform: "scale(0.95)",
+  },
 });
 
 export const StyledZoomOut = styled(ZoomOut)({
-  fontSize: 30,
+  fontSize: 24,
+  color: "#4b5563",
 });
 
 export const StyledZoomIn = styled(ZoomIn)({
-  fontSize: 30,
+  fontSize: 24,
+  color: "#4b5563",
 });
 
 export const ZoomLevelValue = styled(Box)({
-  mx: 1,
-  fontSize: "1.4rem",
+  fontSize: "1rem",
+  fontWeight: 500,
+  color: "#374151",
 });
+
+export const Line = styled.hr`
+  width: 100%;
+  margin: 0;
+`;
 
 export const DownloadIconButton = styled(IconButton)`
   position: absolute !important;
-  top: 5px;
-  left: 5px;
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  pointer-events: auto;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 16px !important;
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+
+  &:hover {
+    background-color: #ffffff !important;
+    transform: scale(1.05);
+  }
+
+  svg {
+    color: #374151;
+  }
 `;
 
 export const DeleteIconButton = styled(IconButton)`
@@ -79,7 +145,7 @@ export const ScrollToTopFab = MuiStyled(Fab, {
   width: 45,
   height: 45,
   position: "fixed",
-  bottom: 72,
+  bottom: 82,
   right: "50%",
   transform: show ? "translate(50%, 0)" : "translate(50%, 20px)",
   opacity: show ? 1 : 0,
@@ -87,13 +153,13 @@ export const ScrollToTopFab = MuiStyled(Fab, {
   pointerEvents: show ? "auto" : "none",
 }));
 
-export const CloseButton = styled(IconButton)({
-  position: "absolute",
-  top: "20px",
-  right: "20px",
-  zIndex: 9,
-  backgroundColor: "rgba(255,255,255,0.7)",
-});
+export const CloseButton = styled(IconButton)`
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 9 !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+`;
 
 export const WrapPhotosCarousel = MuiStyled(Box)(({ theme }) => ({
   position: "absolute",

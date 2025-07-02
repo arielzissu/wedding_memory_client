@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 
 export const MainApp = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   background-color: #fef3f8;
 `;
 
@@ -89,7 +89,7 @@ export const StyledBottomNavigationAction = muiStyled(BottomNavigationAction, {
   },
 
   "& .MuiSvgIcon-root": {
-    padding: 10,
+    padding: selected ? 8 : 4,
     borderRadius: "16px",
     background: selected
       ? "linear-gradient(to bottom right, #f43f5e, #ec4899)"
