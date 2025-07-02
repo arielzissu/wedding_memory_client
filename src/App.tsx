@@ -337,7 +337,7 @@ export const App = () => {
     return (
       <div
         style={{
-          backgroundImage: "url('../../assets/hero.jpg')",
+          backgroundImage: "url('../../assets/hero.JPG')",
           backgroundSize: "cover",
           backgroundPosition: "0 -20px",
           backgroundRepeat: "no-repeat",
