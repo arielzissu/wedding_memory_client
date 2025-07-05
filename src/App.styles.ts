@@ -118,11 +118,11 @@ export const Indicator = styled.div`
   transition: left 0.4s ease;
 `;
 export const HeroPhoto = styled.div`
-  background-image: url('../../assets/hero.JPG');
+  background-image: url('../../assets/hero.PNG');
   background-size: contain;
   background-repeat: no-repeat;
   width: 100%;
   height: 150px;
-  background-color: white;
+  background-color: #fef3f8;
   background-position: center;
 `;
