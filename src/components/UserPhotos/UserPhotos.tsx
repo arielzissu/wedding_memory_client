@@ -97,6 +97,7 @@ const UserPhotos = ({
         files={loggedUserFiles}
         setFiles={setLoggedUserFiles}
         isDeletable={true}
+        defaultZoom={150}
       />
     </>
   );

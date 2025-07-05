@@ -108,7 +108,7 @@ export const WrapRoutes = muiStyled(Box)({
   marginBottom: "64px",
 });
 
-export const Indicator = styled("div")`
+export const Indicator = styled.div`
   position: absolute;
   top: 0;
   height: 4px;
@@ -116,4 +116,13 @@ export const Indicator = styled("div")`
   background-color: rgb(225, 29, 72);
   border-radius: 2px;
   transition: left 0.4s ease;
+`;
+export const HeroPhoto = styled.div`
+  background-image: url('../../assets/hero.JPG');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 150px;
+  background-color: white;
+  background-position: center;
 `;

@@ -24,6 +24,7 @@ import {
   WrapZoomLevel,
   ZoomButton,
   Line,
+  CarouselControls,
 } from "./PhotoDisplayGrid.styles";
 import { IR2File } from "types";
 import { deletePhoto } from "api/r2Upload";
@@ -42,6 +43,7 @@ interface IPhotoDisplayGridProps {
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
   setFiles: React.Dispatch<React.SetStateAction<IR2File[]>>;
   isDeletable?: boolean;
+  defaultZoom?: number;
 }
 
 const PhotoDisplayGrid = ({
@@ -50,8 +52,9 @@ const PhotoDisplayGrid = ({
   setSelectedIndex,
   setFiles,
   isDeletable = false,
+  defaultZoom = 100,
 }: IPhotoDisplayGridProps) => {
-  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [zoomLevel, setZoomLevel] = useState<number>(defaultZoom);
   const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
   const [displayedCount, setDisplayedCount] = useState<number>(BATCH_SIZE);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +69,9 @@ const PhotoDisplayGrid = ({
   } | null>(null);
 
   const [hasMore, setHasMore] = useState(true);
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState<number>(
+    selectedIndex ?? 0
+  );
 
   const handleScroll = () => {
     if (window.scrollY > SHOW_SCROLL_BUTTON_FROM_Y_PIXEL) {
@@ -109,6 +115,16 @@ const PhotoDisplayGrid = ({
     });
   }, [displayedCount, files]);
 
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      setActiveCarouselIndex(selectedIndex);
+    }
+  }, [selectedIndex]);
+
+  const onClickCard = (index: number) => {
+    setSelectedIndex(index);
+  };
+
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     index: number,
@@ -129,10 +145,6 @@ const PhotoDisplayGrid = ({
     await deletePhoto(userData.email, deleteTarget.fileName);
     setIsLoadingDelete(false);
     setDeleteTarget(null);
-  };
-
-  const onClickCard = (index: number) => {
-    setSelectedIndex(index);
   };
 
   const scrollToFirstImage = () => {
@@ -176,8 +188,13 @@ const PhotoDisplayGrid = ({
         document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
       } catch (error) {
-        console.error("Download failed:", error);
-        snackbarStore.show("Download failed", "error");
+        try {
+          setIsOpenDownloadModal(true);
+          setDownloadPhotoUrl(mediaUrl);
+        } catch (error) {
+          console.error("Download failed:", error);
+          snackbarStore.show("Download failed", "error");
+        }
       }
     }
   };
@@ -293,9 +310,20 @@ const PhotoDisplayGrid = ({
         onClose={() => setSelectedIndex(null)}
       >
         <WrapPhotosCarousel>
-          <CloseButton onClick={() => setSelectedIndex(null)}>
+          {/* <CloseButton onClick={() => setSelectedIndex(null)}>
             <Close />
           </CloseButton>
+
+          {renderDownloadButton()} */}
+
+          <CarouselControls>
+            <CloseButton onClick={() => setSelectedIndex(null)}>
+              <Close />
+            </CloseButton>
+
+            {files[activeCarouselIndex] &&
+              renderDownloadButton(files[activeCarouselIndex])}
+          </CarouselControls>
 
           <SwiperWrapper>
             <Swiper
@@ -310,7 +338,8 @@ const PhotoDisplayGrid = ({
               loop
               initialSlide={selectedIndex || 0}
               style={{ height: "100%" }}
-              onSlideChange={() => {
+              onSlideChange={(swiper) => {
+                setActiveCarouselIndex(swiper.realIndex);
                 document
                   .querySelectorAll("video")
                   .forEach((video) => video.pause());
@@ -335,7 +364,7 @@ const PhotoDisplayGrid = ({
                       />
                     )}
                   </Box>
-                  {renderDownloadButton(file)}
+                  {/* {renderDownloadButton(file)} */}
                 </SwiperSlide>
               ))}
             </Swiper>

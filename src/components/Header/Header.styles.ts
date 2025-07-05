@@ -26,7 +26,7 @@ export const WrapHeader = styled(Box)(() => ({
   justifyContent: "space-between",
   alignItems: "center",
   padding: "16px",
-  backgroundColor: "white",
+  backgroundColor: "#fef3f8",
 }));
 
 export const WrapTitle = styled(Box)(() => ({

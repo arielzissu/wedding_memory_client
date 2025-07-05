@@ -21,7 +21,12 @@ export const SwiperWrapper = styled.div`
     display: flex;
     align-items: center;
   }
-  .swiper-pagination-bullet-active {
+  .swiper-pagination {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 4px;
+    border-radius: 10px;
+  }
+  .swiper-pagination-bullet {
     background: linear-gradient(to right, #f43f5e, #ec4899) !important;
   }
   .swiper-button-prev {
@@ -31,12 +36,12 @@ export const SwiperWrapper = styled.div`
     color: #f43f5e !important;
   }
   .swiper-button-prev:after {
-    background: rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
     padding: 8px !important;
     border-radius: 10px !important;
   }
   .swiper-button-next:after {
-    background: rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
     padding: 8px !important;
     border-radius: 10px !important;
   }
@@ -97,11 +102,11 @@ export const Line = styled.hr`
 
 export const DownloadIconButton = styled(IconButton)`
   position: absolute !important;
-  top: 8px;
-  left: 8px;
-  z-index: 10;
+  top: 20px !important;
+  left: 20px !important;
+  z-index: 10 !important;
   background-color: rgba(255, 255, 255, 0.9) !important;
-  border-radius: 16px !important;
+  border-radius: 50% !important;
   width: 48px;
   height: 48px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -158,7 +163,20 @@ export const CloseButton = styled(IconButton)`
   top: 20px !important;
   right: 20px !important;
   z-index: 9 !important;
-  background-color: rgba(255, 255, 255, 0.7) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    background-color: #ffffff !important;
+    transform: scale(1.05);
+  }
+
+  svg {
+    color: #374151;
+  }
 `;
 
 export const WrapPhotosCarousel = MuiStyled(Box)(({ theme }) => ({
@@ -171,7 +189,6 @@ export const WrapPhotosCarousel = MuiStyled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   width: "90%",
   maxWidth: "600px",
-  height: "98%",
   borderRadius: "8px",
   overflow: "hidden",
 }));
@@ -189,4 +206,13 @@ export const CarouselVideo = styled("video")`
   height: auto;
   max-height: 95vh;
   object-fit: cover;
+`;
+
+export const CarouselControls = styled.div`
+  /* position: absolute; */
+  /* top: 12px;
+  right: 12px; */
+  display: flex;
+  gap: 8px;
+  /* z-index: 2; */
 `;

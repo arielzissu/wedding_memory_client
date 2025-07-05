@@ -45,6 +45,7 @@ import {
   WrapVisualApp,
   MainApp,
   Indicator,
+  HeroPhoto,
 } from "App.styles";
 
 export const App = () => {
@@ -333,26 +334,11 @@ export const App = () => {
 
   const shouldShowUploadButton = !userEmail && isFiveSecondsPassed;
 
-  const HeroPicture = () => {
-    return (
-      <div
-        style={{
-          backgroundImage: "url('../../assets/hero.JPG')",
-          backgroundSize: "cover",
-          backgroundPosition: "0 -20px",
-          backgroundRepeat: "no-repeat",
-          width: "100%",
-          height: "200px",
-        }}
-      ></div>
-    );
-  };
-
   return (
     <MainApp>
       <WrapVisualApp>
         <Header user={user} onSignOut={handleSignOut} onSignIn={handleSignIn} />
-        <HeroPicture />
+        <HeroPhoto />
 
         {renderUploadButton()}
 
